@@ -1,9 +1,32 @@
 package io;
 
+import model.Car;
+import model.Request;
+import model.Zone;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/*
+type of csv:
+    +Requests: num_requests
+    request_id;zone_id;day_index;start_time;duration;possible_vehicle_id,...possible_vehicle_id;penalty1;penalty2
+    ...
+    request_id;zone_id;day_index;start_time;duration;possible_vehicle_id,...possible_vehicle_id;penalty1;penalty2
+    +Zones: num_zones
+    zone_id;adjacent_zone_id,...adjacent_zone_id
+    ...
+    zone_id;adjacent_zone_id,...adjacent_zone_id
+    +Vehicles: num_vehicles
+    vehicle_id
+    ...
+    vehicle_id
+    +Days: num_days
+ */
 
 public class readProblem {
     //read in problem and make requests, zones, and zone tot zone matrix
@@ -12,29 +35,79 @@ public class readProblem {
     BufferedReader br = null;
     String line = "";
     String cvsSplitBy = ";";
-    Integer numberOfRequests;
+    Integer numberOfRequests, numberOfZones, numberOfVehicles;
     String[] tmp;
+    private List<Request> requestList = new ArrayList<>();
+    private List<Zone> zoneList = new ArrayList<>();
+    private List<Car> carList = new ArrayList<>();
+    private Integer days;
+    private Integer [][] adjacentZone;
 
     public void readIn() {
         try {
             br = new BufferedReader(new FileReader(csvFile));
             line = br.readLine();
             tmp = line.split(":");
-            numberOfRequests = Integer.parseInt(tmp[1]);
-            int request_id, day_index, start_time, duration, penalty1, penalty2;
-            String zone_id;
+            //read all requests
+            numberOfRequests = Integer.parseInt(tmp[1].replaceAll("\\s+",""));
+            int day_index, start_time, duration, penalty1, penalty2, zone_id;
+            Integer request_id ;
             String [] possible_vehicle_list;
             for (int i = 0; i < numberOfRequests ; i++) {
+                line=br.readLine();
                 tmp = line.split(cvsSplitBy);
-                request_id= Integer.parseInt(tmp[0]);
-                zone_id = tmp[1];
+                request_id= Integer.parseInt(tmp[0].replaceAll("\\D+",""));
+                zone_id = Integer.parseInt(tmp[1].replaceAll("\\D+",""));
+                day_index = Integer.parseInt(tmp[2]);
+                start_time = Integer.parseInt(tmp[3]);
+                duration = Integer.parseInt(tmp[4]);
+                penalty1 = Integer.parseInt(tmp[6]);
+                penalty2 = Integer.parseInt(tmp[7]);
+                possible_vehicle_list = tmp[5].split(",");
+                requestList.add(new Request(request_id, day_index, start_time, duration, penalty1, penalty2, zone_id, possible_vehicle_list));
+            }
+            //read all adjacent zones
+            line= br.readLine();
+            tmp = line.split(":");
+            numberOfZones = Integer.parseInt(tmp[1].replaceAll("\\s+",""));
+            adjacentZone = new Integer[numberOfZones][numberOfZones];
+            for (int i = 0; i < numberOfZones; i++) {
+                line = br.readLine();
+                tmp = line.split(cvsSplitBy);
+                Integer headZone = Integer.parseInt(tmp[0].replaceAll("\\D+",""));
+                Integer zone;
+                tmp = tmp[1].split(",");
+                for (int j = 0; j < tmp.length; j++) {
+                    zone = Integer.parseInt(tmp[j].replaceAll("\\D+",""));
+                    adjacentZone[headZone][zone] = 1;
+                }
+            }
+            //to print out and see what happens:
+//            for (Integer[] x : adjacentZone)
+//            {
+//                for (Integer y : x)
+//                {
+//                    if(y ==null){
+//                        y = 0;
+//                    }
+//                    System.out.print(y + " ");
+//                }
+//                System.out.println();
+//            }
+            //read all vehicles vehicle is just a number
+            line= br.readLine();
+            tmp = line.split(":");
+            numberOfVehicles =  Integer.parseInt(tmp[1].replaceAll("\\s+",""));
+            for (int i = 0; i < numberOfVehicles; i++) {
+                line = br.readLine();
+                tmp = line.split("");
+                carList.add(new Car(line));
             }
 
+            line = br.readLine();
+            tmp = line.split(":");
+            days = Integer.parseInt(tmp[1].replaceAll("\\s+",""));
 
-            while ((line = br.readLine()) != null) {
-                String[] test = line.split(":");
-                System.out.println(test[1]);
-            }
         } catch (FileNotFoundException e) {
             System.out.println(e);
         } catch (IOException e) {
