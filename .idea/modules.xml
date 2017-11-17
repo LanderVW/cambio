@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/cambio.iml" filepath="$PROJECT_DIR$/cambio.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cambio.git.iml" filepath="$PROJECT_DIR$/cambio.git.iml" />
     </modules>
   </component>
 </project>
