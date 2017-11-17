@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="lorgfx-0.2.1-core">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Tsp/java/lib/lorgfx-0.2.1-core.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/cambio.iml" filepath="$PROJECT_DIR$/cambio.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Tsp/java/tsp-gui/src/main/main.iml" filepath="$PROJECT_DIR$/../Tsp/java/tsp-gui/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Tsp/java/tsp-core/src/main/main1.iml" filepath="$PROJECT_DIR$/../Tsp/java/tsp-core/src/main/main1.iml" />
     </modules>
   </component>
 </project>
