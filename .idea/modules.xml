@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/cambio.git.iml" filepath="$PROJECT_DIR$/cambio.git.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/cambio.iml" filepath="$PROJECT_DIR$/cambio.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Tsp/java/tsp-gui/src/main/main.iml" filepath="$PROJECT_DIR$/../Tsp/java/tsp-gui/src/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Tsp/java/tsp-core/src/main/main1.iml" filepath="$PROJECT_DIR$/../Tsp/java/tsp-core/src/main/main1.iml" />
->>>>>>> 191c38a0b242fa5de1104931a8a5f2bc97b09b13
     </modules>
   </component>
 </project>
