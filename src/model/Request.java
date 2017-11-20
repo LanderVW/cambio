@@ -94,4 +94,21 @@ public class Request {
     public void setPossible_vehicle_list(String[] possible_vehicle_list) {
         this.possible_vehicle_list = possible_vehicle_list;
     }
+
+    public boolean Overlap(Request r) {
+        //nog niet met doorlopende dagen gewerkt
+        boolean one = (this.getDay_index() == r.getDay_index() && this.getStart_time() < (r.getStart_time() + r.getDuration() ));
+        boolean two= (r.getDay_index() == this.getDay_index() && r.getStart_time()< this.getStart_time() + this.getDuration());
+        return one && two;
+    }
+
+    public boolean before(Request request){
+        if(this.getDay_index() < request.getDay_index()){
+            return true;
+        }
+        if(this.getDay_index() == request.getDay_index() && this.getStart_time() < request.getStart_time()){
+            return true;
+        }
+        return false;
+    }
 }

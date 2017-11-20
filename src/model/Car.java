@@ -1,9 +1,20 @@
 package model;
 
 public class Car {
-    private String id;
+    private Integer id;
 
-    public Car(String id) {
+    public Car(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id='" + id + '\'' +
+                '}';
+    }
+
+    public Integer getId() {
+        return id;
     }
 }
