@@ -2,6 +2,7 @@ package io;
 
 import model.Car;
 import model.Request;
+import model.Solution;
 import model.Zone;
 
 import java.io.BufferedReader;
@@ -10,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /*
 type of csv:
@@ -37,16 +39,20 @@ public class readProblem {
     String cvsSplitBy = ";";
     Integer numberOfRequests, numberOfZones, numberOfVehicles;
     String[] tmp;
-    private List<Request> requestList = new ArrayList<>();
-    private List<Integer> zoneList = new ArrayList<>();
-    private List<Car> carList = new ArrayList<>();
+    private List<Request> requestList ;
+    private List<Integer> zoneList ;
+    private List<Car> carList ;
     private Integer days;
-    private Integer[][] adjacentZone;
-    private Integer[][] carToZone;
+    private int[][] adjacentZone;
+    private static final Random random = new Random(0);
+
 //    private Integer[][] requestToCar;
 
     public void readIn() {
         try {
+            requestList = new ArrayList<>();
+            zoneList = new ArrayList<>();
+            carList = new ArrayList<>();
             br = new BufferedReader(new FileReader(csvFile));
             line = br.readLine();
             tmp = line.split(":");
@@ -55,6 +61,7 @@ public class readProblem {
             int day_index, start_time, duration, penalty1, penalty2, zone_id;
             Integer request_id;
             String[] possible_vehicle_list;
+            ArrayList possible_car_list;
             for (int i = 0; i < numberOfRequests; i++) {
                 line = br.readLine();
                 tmp = line.split(cvsSplitBy);
@@ -66,13 +73,17 @@ public class readProblem {
                 penalty1 = Integer.parseInt(tmp[6]);
                 penalty2 = Integer.parseInt(tmp[7]);
                 possible_vehicle_list = tmp[5].split(",");
-                requestList.add(new Request(request_id, day_index, start_time, duration, penalty1, penalty2, zone_id, possible_vehicle_list));
+                possible_car_list = new ArrayList();
+                for (Integer j = 0 ; j< possible_vehicle_list.length ; j++){
+                    possible_car_list.add(Integer.parseInt(possible_vehicle_list[j].replaceAll("\\D+", "")));
+                }
+                requestList.add(new Request(request_id, day_index, start_time, duration, penalty1, penalty2, zone_id, possible_car_list));
             }
             //read all adjacent zones
             line = br.readLine();
             tmp = line.split(":");
             numberOfZones = Integer.parseInt(tmp[1].replaceAll("\\s+", ""));
-            adjacentZone = new Integer[numberOfZones][numberOfZones];
+            adjacentZone = new int[numberOfZones][numberOfZones];
             for (int i = 0; i < numberOfZones; i++) {
                 line = br.readLine();
                 tmp = line.split(cvsSplitBy);
@@ -85,18 +96,7 @@ public class readProblem {
                     adjacentZone[headZone][zone] = 1;
                 }
             }
-            //to print out and see what happens:
-//            for (Integer[] x : adjacentZone)
-//            {
-//                for (Integer y : x)
-//                {
-//                    if(y ==null){
-//                        y = 0;
-//                    }
-//                    System.out.print(y + " ");
-//                }
-//                System.out.println();
-//            }
+
             //read all vehicles vehicle is just a number
             line = br.readLine();
             tmp = line.split(":");
@@ -117,67 +117,8 @@ public class readProblem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        solve();
+//        solve();
     }
-
-    private Integer[][] requestToCar;
-    private Integer[][] requestToRequest;
-
-    public void solve() {
-        int MAX_IDLE = 100000;
-        int L = 1000;
-
-        /* create initial solution ------------------------- */
-        carToZone = new Integer[carList.size()][zoneList.size()];
-        requestToCar = new Integer[requestList.size()][carList.size()];
-        for (int i = 0; i < carList.size(); i++) {
-            carToZone[i][0] = 1;
-        }
-
-        //iedere request heeft een integerid onze r-r matrix werkt dan ook met die id's
-        requestToRequest = new Integer[requestList.size()][requestList.size()];
-        for (int i = 0; i < requestList.size(); i++) {
-            for (int j = 0; j < requestList.size(); j++) {
-                if (requestList.get(i).Overlap(requestList.get(j))) {
-                    requestToRequest[i][j] = 1;
-                }
-
-            }
-        }
-
-
-
-        //requests aan cars toekennen
-        for (int i = 0; i < carList.size(); i++) {
-            if (requestList.get(i).getZone_id() == getZoneForCar(carList.get(i).getId())) {
-                requestToCar[requestList.get(i).getRequest_id()][carList.get(i).getId()] = 1;
-            }
-        }
-        //check als goeie opl
-        for (Integer[] x : requestToCar) {
-            for (Integer y : x) {
-                if (y == null) {
-                    y = 0;
-                }
-                System.out.print(y + " ");
-            }
-            System.out.println();
-        }
-
-    }
-
-    private Integer getZoneForCar(Integer car) {
-        for (int i = 0; i < zoneList.size(); i++) {
-            if (carToZone[car][i] == 1) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    /* [meta] init ------------------------------------- */
-    int idle = 0;
-    int count = 0;
 
     public Integer getNumberOfRequests() {
         return numberOfRequests;
@@ -211,7 +152,7 @@ public class readProblem {
         return days;
     }
 
-    public Integer[][] getAdjacentZone() {
+    public int[][] getAdjacentZone() {
         return adjacentZone;
     }
 }

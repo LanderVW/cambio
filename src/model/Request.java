@@ -1,12 +1,13 @@
 package model;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class Request {
     private int day_index, start_time, duration, penalty1, penalty2, zone_id, request_id;
-    private String [] possible_vehicle_list;
+    private ArrayList possible_vehicle_list;
+    private Integer currentPenalty;
 
-    public Request(Integer request_id, int day_index, int start_time, int duration, int penalty1, int penalty2, int zone_id, String[] possible_vehicle_list) {
+    public Request(Integer request_id, int day_index, int start_time, int duration, int penalty1, int penalty2, int zone_id, ArrayList possible_vehicle_list) {
         this.request_id = request_id;
         this.day_index = day_index;
         this.start_time = start_time;
@@ -27,7 +28,7 @@ public class Request {
                 ", penalty2=" + penalty2 +
                 ", zone_id='" + zone_id + '\'' +
                 ", request_id='" + request_id + '\'' +
-                ", possible_vehicle_list=" + Arrays.toString(possible_vehicle_list) +
+
                 '}';
     }
 
@@ -37,6 +38,22 @@ public class Request {
 
     public void setRequest_id(Integer request_id) {
         this.request_id = request_id;
+    }
+
+    public void setZone_id(int zone_id) {
+        this.zone_id = zone_id;
+    }
+
+    public void setRequest_id(int request_id) {
+        this.request_id = request_id;
+    }
+
+    public Integer getCurrentPenalty() {
+        return currentPenalty;
+    }
+
+    public void setCurrentPenalty(Integer currentPenalty) {
+        this.currentPenalty = currentPenalty;
     }
 
     public int getDay_index() {
@@ -87,26 +104,26 @@ public class Request {
         this.zone_id = zone_id;
     }
 
-    public String[] getPossible_vehicle_list() {
+    public ArrayList getPossible_vehicle_list() {
         return possible_vehicle_list;
     }
 
-    public void setPossible_vehicle_list(String[] possible_vehicle_list) {
+    public void setPossible_vehicle_list(ArrayList possible_vehicle_list) {
         this.possible_vehicle_list = possible_vehicle_list;
     }
 
     public boolean Overlap(Request r) {
         //nog niet met doorlopende dagen gewerkt
-        boolean one = (this.getDay_index() == r.getDay_index() && this.getStart_time() < (r.getStart_time() + r.getDuration() ));
-        boolean two= (r.getDay_index() == this.getDay_index() && r.getStart_time()< this.getStart_time() + this.getDuration());
+        boolean one = (this.getDay_index() == r.getDay_index() && this.getStart_time() < (r.getStart_time() + r.getDuration()));
+        boolean two = (r.getDay_index() == this.getDay_index() && r.getStart_time() < this.getStart_time() + this.getDuration());
         return one && two;
     }
 
-    public boolean before(Request request){
-        if(this.getDay_index() < request.getDay_index()){
+    public boolean before(Request request) {
+        if (this.getDay_index() < request.getDay_index()) {
             return true;
         }
-        if(this.getDay_index() == request.getDay_index() && this.getStart_time() < request.getStart_time()){
+        if (this.getDay_index() == request.getDay_index() && this.getStart_time() < request.getStart_time()) {
             return true;
         }
         return false;
