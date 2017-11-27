@@ -4,9 +4,7 @@ import model.Car;
 import model.Request;
 import model.Solution;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class solver {
     private List<Request> requestList;
@@ -28,6 +26,7 @@ public class solver {
     }
 
     public void solve() {
+
         //overlappende requests berekenen
         //iedere request heeft een integerid onze r-r matrix werkt dan ook met die id's
         requestToRequest = new int[requestList.size()][requestList.size()];
@@ -104,26 +103,29 @@ public class solver {
                              requestToCar[i][vehicleID] =1;
                              assigned = true;
                              System.out.println("request "+i+"toegekend aan vehicleid "+vehicleID+" adjacent zone");
-                             penalty += 20;
+                             penalty += requestList.get(i).getPenalty2();
                              break;
                          }
                      }
 
                 }
             }
+            if(!assigned){
+                penalty += requestList.get(i).getPenalty1();
+            }
         }
 
 
-        penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
+        //penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
         System.out.println("initial penalty"+penalty);
         int currentPenalty = penalty;
-
+        int adjacentRequests;
         Solution currentSolution = new Solution(requestToCar, carToZone, penalty);
         Solution bestSolution = new Solution(currentSolution);
         /* loop -------------------------------------------- */
-        for (int l = 0; l < 999; l++) {
+        for (int l = 0; l < 99999999; l++) {
 
-
+            adjacentRequests = 0;
             penalty = 0;
 
             //clearen
@@ -168,16 +170,19 @@ public class solver {
                                 requestToCar[i][vehicleID] =1;
                                 assigned = true;
                                 //System.out.println("request "+i+"toegekend aan vehicleid "+vehicleID+" adjacent zone");
-                                penalty += 20;
+                                penalty += requestList.get(i).getPenalty2();
                                 break;
                             }
                         }
 
                     }
                 }
+                if(!assigned){
+                    penalty += requestList.get(i).getPenalty1();
+                }
             }
-            penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
-            System.out.println("new penalty "+penalty);
+            //penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
+            //System.out.println("new penalty "+penalty );
             if(penalty < currentPenalty) {
                 currentPenalty = penalty;
                 bestSolution = new Solution(requestToCar, carToZone, penalty);
