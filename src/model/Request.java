@@ -28,6 +28,7 @@ public class Request {
                 ", penalty2=" + penalty2 +
                 ", zone_id='" + zone_id + '\'' +
                 ", request_id='" + request_id + '\'' +
+                ", possible vehicles= "+possible_vehicle_list +
 
                 '}';
     }
@@ -112,7 +113,7 @@ public class Request {
         this.possible_vehicle_list = possible_vehicle_list;
     }
 
-    public boolean Overlap(Request r) {
+    public boolean overlap(Request r) {
         //nog niet met doorlopende dagen gewerkt
         boolean one = (this.getDay_index() == r.getDay_index() && this.getStart_time() < (r.getStart_time() + r.getDuration()));
         boolean two = (r.getDay_index() == this.getDay_index() && r.getStart_time() < this.getStart_time() + this.getDuration());
