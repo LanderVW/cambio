@@ -115,6 +115,7 @@ public class Request {
 
     public boolean overlap(Request r) {
         //nog niet met doorlopende dagen gewerkt
+//        todo doorlopende dagen checken
         boolean one = (this.getDay_index() == r.getDay_index() && this.getStart_time() < (r.getStart_time() + r.getDuration()));
         boolean two = (r.getDay_index() == this.getDay_index() && r.getStart_time() < this.getStart_time() + this.getDuration());
         return one && two;

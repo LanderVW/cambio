@@ -39,9 +39,9 @@ public class readProblem {
     String cvsSplitBy = ";";
     Integer numberOfRequests, numberOfZones, numberOfVehicles;
     String[] tmp;
-    private List<Request> requestList ;
-    private List<Integer> zoneList ;
-    private List<Car> carList ;
+    private List<Request> requestList;
+    private List<Integer> zoneList;
+    private List<Car> carList;
     private Integer days;
     private int[][] adjacentZone;
     private static final Random random = new Random(0);
@@ -74,7 +74,7 @@ public class readProblem {
                 penalty2 = Integer.parseInt(tmp[7]);
                 possible_vehicle_list = tmp[5].split(",");
                 possible_car_list = new ArrayList();
-                for (Integer j = 0 ; j< possible_vehicle_list.length ; j++){
+                for (Integer j = 0; j < possible_vehicle_list.length; j++) {
                     possible_car_list.add(Integer.parseInt(possible_vehicle_list[j].replaceAll("\\D+", "")));
                 }
                 requestList.add(new Request(request_id, day_index, start_time, duration, penalty1, penalty2, zone_id, possible_car_list));
