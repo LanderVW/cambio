@@ -250,22 +250,21 @@ public class solver {
 
          /* create initial solution ------------------------- */
         carToZone = new int[carList.size()][zoneList.size()];
-//        todo reqtocar moet niet hier worden aangemaakt denkik
-        requestToCar = new int[requestList.size()][carList.size()];
-
+        
         for (int i = 0; i < carList.size(); i++) {
 //            iedere auto in een random zone zetten
             carToZone[i][random.nextInt(zoneList.size())] = 1;
         }
 
+//        lege requestToCar aanmaken zodat die kan worden gebruikt in de checkCost()
+        requestToCar = new int[requestList.size()][carList.size()];
         int penalty = checkCost();
         bestSolution = new Solution(requestToCar, carToZone, penalty);
 
         lastSolution = bestSolution;
 
-        System.out.println("print na init()");
-        printInfo();
-     //einde init
+//        System.out.println("print na init()");
+//        printInfo();
     }
 
     /**
@@ -359,8 +358,5 @@ public class solver {
             }
             System.out.println();
         }
-
-
-
     }
 }
