@@ -28,6 +28,167 @@ public class solver {
         this.adjacentZone = adjacentZone;
     }
 
+    /**
+     * 1) initieer reqToReq voor overlappende requests
+     * 2) initieer een oplossing(solution)
+     * - car to zone
+     * - via een eerste checkCost() wordt reqToCar geintitieerd
+     * <p>
+     * best solution wordt opgeslagen
+     * last solution wordt gelijkgesteld aan bestsolution
+     */
+    public void init() {
+//        overlappende requests berekenen
+//        iedere request heeft een integerid onze r-r matrix werkt dan ook met die id's
+        requestToRequest = new int[requestList.size()][requestList.size()];
+        for (int i = 0; i < requestList.size(); i++) {
+            for (int j = 0; j < requestList.size(); j++) {
+                if (requestList.get(i).overlap(requestList.get(j))) {
+                    requestToRequest[i][j] = 1;
+                }
+            }
+        }
+
+         /* create initial solution ------------------------- */
+        carToZone = new int[carList.size()][zoneList.size()];
+
+        for (int i = 0; i < carList.size(); i++) {
+//            iedere auto in een random zone zetten
+            carToZone[i][random.nextInt(zoneList.size())] = 1;
+        }
+
+//        lege requestToCar aanmaken zodat die kan worden gebruikt in de checkCost()
+        requestToCar = new int[requestList.size()][carList.size()];
+        int penalty = checkCost(carToZone, requestToCar);
+        bestSolution = new Solution(requestToCar, carToZone, penalty);
+
+        lastSolution = bestSolution;
+
+//        System.out.println("print na init()");
+//        printInfo();
+    }
+
+    /**
+     * localsearchmethode
+     */
+    public void localSearch(int number) {
+        int idle = number;
+        for (int i = 0; i < requestToCar.length; i++) {
+            for (int j = 0; j < requestToCar[0].length; j++) {
+                requestToCar[i][j] = -1;
+            }
+        }
+
+        int carSelected = random.nextInt(carToZone.length);
+
+        int zone1 = -1, zone2 = -1;
+        while (true) {
+            zone1 = getZoneForCar(carSelected);
+//            zone1 = random.nextInt(carToZoneLocal[0].length);
+            zone2 = random.nextInt(carToZone[0].length);
+            if (!(carToZone[carSelected][zone1] == 0 &&
+                    carToZone[carSelected][zone2] == 0)) {
+                break;
+            }
+        }
+
+
+        int temp = -1;
+
+//        verplaats autos @random
+        temp = carToZone[carSelected][zone1];
+        carToZone[carSelected][zone1] = carToZone[carSelected][zone2];
+        carToZone[carSelected][zone2] = temp;
+
+        int penaltyNaLocalSearch = checkCost(carToZone, requestToCar);
+
+        if (penaltyNaLocalSearch <= bestSolution.getPenalty()) {
+            bestSolution = new Solution(requestToCar, carToZone, penaltyNaLocalSearch);
+//            System.out.println("betere oplossing gevonden");
+            localSearch(0);
+            idle = 1001;
+        }
+        if (idle >= 1000) {
+//            hier stopt local search
+
+
+        }else{
+            localSearch(++idle);
+        }
+    }
+
+    /**
+     * bereken cost van huidige carToZone
+     *
+     * @return cost
+     */
+    public Integer checkCost(int[][] carToZone, int[][] requestToCar) {
+          /* [meta] init ------------------------------------- */
+        int idle = 0;
+        int count = 0;
+        int penalty = 0;
+
+//        initiële oplossing requests toekennen aan cars
+
+        for (int i = 0; i < requestList.size(); i++) {
+            ArrayList<Integer> possibleVehicles = requestList.get(i).getPossible_vehicle_list();
+            boolean assigned = false;
+            for (int j = 0; j < possibleVehicles.size(); j++) {
+                int vehicleID = possibleVehicles.get(j);
+
+                //vehicle is beschikbaar in gevraagde zone, checken indien mogelijk om toe te kennen
+                //er wordt geen penalty aangerekend
+                if (carToZone[vehicleID][requestList.get(i).getZone_id()] == 1) {
+                    if (!checkOverlappingRequests(vehicleID, i)) {
+                        requestToCar[i][vehicleID] = 1;
+                        assigned = true;
+//                        System.out.println("request " + i + " toegekend aan vehicleid " + vehicleID);
+                        break;
+                    }
+                }
+            }
+
+            //checken indien vehicle uit possiblevehiclelist vrij in adjacent zone
+            if (!assigned) {
+                for (int j = 0; j < possibleVehicles.size(); j++) {
+                    int vehicleID = possibleVehicles.get(j);
+                    int carZone = getZoneForCar(vehicleID);
+                    int requestZone = requestList.get(i).getZone_id();
+                    //checken indien voertuig zich in adjacent zone van de request bevindt
+
+                    if (adjacentZone[carZone][requestZone] == 1) {
+                        //zone waarin car zich bevindt is een aangrenzende zone van requestZone
+                        if (!checkOverlappingRequests(vehicleID, i)) {
+                            requestToCar[i][vehicleID] = 1;
+                            assigned = true;
+//                            System.out.println("request " + i + " toegekend aan vehicleid " + vehicleID + " adjacent zone");
+                            penalty += requestList.get(i).getPenalty2();
+                            break;
+                        }
+                    }
+
+                }
+            }
+            if (!assigned) {
+                penalty += requestList.get(i).getPenalty1();
+            }
+        }
+
+
+        //penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
+
+
+        return penalty;
+
+    }
+
+    public void finish() {
+//        todo bereken tijdscost om deze functie uit te voeren (alles moet stoppen voor maxtijd - finishtijd)
+//        System.out.println("best solution: " + bestSolution);
+        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
+        System.out.print("finished met cost: " + bestSolution.getPenalty());
+    }
+
     public void solve() {
 
 
@@ -189,6 +350,7 @@ public class solver {
 
     /**
      * request the zone for a car
+     *
      * @param car
      * @return ZoneId if car is in a zone, null if car is not in a zone
      */
@@ -228,117 +390,12 @@ public class solver {
     }
 
     /**
-     * 1) initieer reqToReq voor overlappende requests
-     * 2) initieer een oplossing(solution)
-     *      - car to zone
-     *      - via een eerste checkCost() wordt reqToCar geintitieerd
-     *
-     * best solution wordt opgeslagen
-     * last solution wordt gelijkgesteld aan bestsolution
+     * printen van de informatie zoals die momenteel is
+     * - alle requests
+     * - cartozone matrix
+     * -adjacentzone matrix
      */
-    public void init() {
-//        overlappende requests berekenen
-//        iedere request heeft een integerid onze r-r matrix werkt dan ook met die id's
-        requestToRequest = new int[requestList.size()][requestList.size()];
-        for (int i = 0; i < requestList.size(); i++) {
-            for (int j = 0; j < requestList.size(); j++) {
-                if (requestList.get(i).overlap(requestList.get(j))) {
-                    requestToRequest[i][j] = 1;
-                }
-            }
-        }
-
-         /* create initial solution ------------------------- */
-        carToZone = new int[carList.size()][zoneList.size()];
-        
-        for (int i = 0; i < carList.size(); i++) {
-//            iedere auto in een random zone zetten
-            carToZone[i][random.nextInt(zoneList.size())] = 1;
-        }
-
-//        lege requestToCar aanmaken zodat die kan worden gebruikt in de checkCost()
-        requestToCar = new int[requestList.size()][carList.size()];
-        int penalty = checkCost();
-        bestSolution = new Solution(requestToCar, carToZone, penalty);
-
-        lastSolution = bestSolution;
-
-//        System.out.println("print na init()");
-//        printInfo();
-    }
-
-    /**
-     * bereken cost van huidige carToZone
-     * @return cost
-     */
-    public Integer checkCost(){
-          /* [meta] init ------------------------------------- */
-        int idle = 0;
-        int count = 0;
-        int penalty = 0;
-
-//        initiële oplossing requests toekennen aan cars
-
-        for (int i = 0; i < requestList.size(); i++) {
-            ArrayList<Integer> possibleVehicles = requestList.get(i).getPossible_vehicle_list();
-            boolean assigned = false;
-            for (int j = 0; j < possibleVehicles.size(); j++) {
-                int vehicleID = possibleVehicles.get(j);
-
-                //vehicle is beschikbaar in gevraagde zone, checken indien mogelijk om toe te kennen
-                //er wordt geen penalty aangerekend
-                if (carToZone[vehicleID][requestList.get(i).getZone_id()] == 1) {
-                    if (!checkOverlappingRequests(vehicleID, i)) {
-                        requestToCar[i][vehicleID] = 1;
-                        assigned = true;
-                        System.out.println("request " + i + " toegekend aan vehicleid " + vehicleID);
-                        break;
-                    }
-                }
-            }
-
-            //checken indien vehicle uit possiblevehiclelist vrij in adjacent zone
-            if (!assigned) {
-                for (int j = 0; j < possibleVehicles.size(); j++) {
-                    int vehicleID = possibleVehicles.get(j);
-                    int carZone = getZoneForCar(vehicleID);
-                    int requestZone = requestList.get(i).getZone_id();
-                    //checken indien voertuig zich in adjacent zone van de request bevindt
-
-                    if (adjacentZone[carZone][requestZone] == 1) {
-                        //zone waarin car zich bevindt is een aangrenzende zone van requestZone
-                        if (!checkOverlappingRequests(vehicleID, i)) {
-                            requestToCar[i][vehicleID] = 1;
-                            assigned = true;
-                            System.out.println("request " + i + " toegekend aan vehicleid " + vehicleID + " adjacent zone");
-                            penalty += requestList.get(i).getPenalty2();
-                            break;
-                        }
-                    }
-
-                }
-            }
-            if (!assigned) {
-                penalty += requestList.get(i).getPenalty1();
-            }
-        }
-
-
-        //penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
-        System.out.println("initial penalty " + penalty);
-
-        return penalty;
-
-    }
-
-    public void finish(){
-//        todo bereken tijdscost om deze functie uit te voeren (alles moet stoppen voor maxtijd - finishtijd)
-//        System.out.println("best solution: " + bestSolution);
-        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
-        System.out.print("finished met cost: " + bestSolution.getPenalty());
-    }
-
-    public void printInfo(){
+    public void printInfo() {
 //        printen info
         System.out.println("alle requests");
         for (Request r : requestList) System.out.println(r);
