@@ -83,7 +83,7 @@ public class solver {
                     if(!checkOverlappingRequests(vehicleID, i)){
                         requestToCar[i][vehicleID] =1;
                         assigned = true;
-                        System.out.println("request "+i+"toegekend aan vehicleid "+vehicleID);
+                        System.out.println("request "+i+" toegekend aan vehicleid "+vehicleID);
                         break;
                     }
                 }
@@ -102,7 +102,7 @@ public class solver {
                          if(!checkOverlappingRequests(vehicleID, i)){
                              requestToCar[i][vehicleID] =1;
                              assigned = true;
-                             System.out.println("request "+i+"toegekend aan vehicleid "+vehicleID+" adjacent zone");
+                             System.out.println("request "+i+" toegekend aan vehicleid "+vehicleID+" adjacent zone");
                              penalty += requestList.get(i).getPenalty2();
                              break;
                          }
@@ -117,7 +117,7 @@ public class solver {
 
 
         //penalty += 100 * (requestList.size() - calculateRequest(requestToCar));
-        System.out.println("initial penalty"+penalty);
+        System.out.println("initial penalty "+penalty);
         int currentPenalty = penalty;
         int adjacentRequests;
         Solution currentSolution = new Solution(requestToCar, carToZone, penalty);
