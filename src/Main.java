@@ -10,7 +10,7 @@ public class Main {
         solver solver = new solver(r.getRequestList(), r.getZoneList(), r.getCarList(), r.getDays(), r.getAdjacentZone());
         solver.init();
 //        solver.solve();
-        solver.localSearch(0);
+        solver.assignCarsToZones();
         solver.finish();
     }
 }

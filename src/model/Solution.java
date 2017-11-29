@@ -1,15 +1,18 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.List;
 
 public class Solution {
 
     private int[][] requestToCar;
     private int[][] carToZone;
     private Integer penalty;
+    private List<Request> unassignedRequests;
 
     public Solution(int[][] requestToCar, int[][] carToZone, Integer penalty) {
         this.requestToCar = requestToCar;
@@ -17,10 +20,32 @@ public class Solution {
         this.penalty = penalty;
     }
 
+    public Solution(int[][] requestToCar, int[][] carToZone, Integer penalty, List<Request> unassignedRequests) {
+        this.requestToCar = requestToCar;
+        this.carToZone = carToZone;
+        this.penalty = penalty;
+        this.unassignedRequests = unassignedRequests;
+    }
+
+    public Solution(int[][] requestToCar, int[][] carToZone) {
+        this.requestToCar = requestToCar;
+        this.carToZone = carToZone;
+        this.unassignedRequests = new ArrayList<>();
+    }
+
     public Solution(Solution s) {
         this.requestToCar = s.getRequestToCar();
         this.carToZone = s.getCarToZone();
         this.penalty = s.getPenalty();
+        this.unassignedRequests = new ArrayList<>();
+    }
+
+    public Solution() {
+        this.unassignedRequests = new ArrayList<>();
+        this.requestToCar = null;
+        this.carToZone = null;
+        this.penalty = null;
+
     }
 
     public int[][] getRequestToCar() {
@@ -42,6 +67,29 @@ public class Solution {
     public Integer getPenalty() {
         return penalty;
     }
+
+    public List<Request> getUnassignedRequests() {
+        return unassignedRequests;
+    }
+
+    public void setUnassignedRequests(List<Request> unassignedRequests) {
+        this.unassignedRequests = unassignedRequests;
+    }
+
+    public void addUnassignedRequest(Request request){
+        unassignedRequests.add(request);
+    }
+    public void removeUnassignedRequest(Request request){
+        unassignedRequests.remove(unassignedRequests.indexOf(request));
+    }
+
+    public void increasePenalty(int plus){
+        this.penalty += plus;
+    }
+    public void decreasePenalty(int min){
+        this.penalty -= min;
+    }
+
 
     public void setPenalty(Integer penalty) {
         this.penalty = penalty;

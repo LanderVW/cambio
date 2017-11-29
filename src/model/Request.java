@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 public class Request {
     private int day_index, start_time, duration, penalty1, penalty2, zone_id, request_id;
-    private ArrayList possible_vehicle_list;
+    private ArrayList<Integer> possible_vehicle_list;
     private Integer currentPenalty;
+    private boolean overlap;
+    private boolean carAvailable;
 
     public Request(Integer request_id, int day_index, int start_time, int duration, int penalty1, int penalty2, int zone_id, ArrayList possible_vehicle_list) {
         this.request_id = request_id;
@@ -16,6 +18,9 @@ public class Request {
         this.penalty2 = penalty2;
         this.zone_id = zone_id;
         this.possible_vehicle_list = possible_vehicle_list;
+        this.overlap = false;
+        this.carAvailable = false;
+
     }
 
     @Override
@@ -105,8 +110,24 @@ public class Request {
         this.zone_id = zone_id;
     }
 
-    public ArrayList getPossible_vehicle_list() {
+    public ArrayList<Integer> getPossible_vehicle_list() {
         return possible_vehicle_list;
+    }
+
+    public boolean isOverlap() {
+        return overlap;
+    }
+
+    public void setOverlap(boolean overlap) {
+        this.overlap = overlap;
+    }
+
+    public boolean isCarAvailable() {
+        return carAvailable;
+    }
+
+    public void setCarAvailable(boolean carAvailable) {
+        this.carAvailable = carAvailable;
     }
 
     public void setPossible_vehicle_list(ArrayList possible_vehicle_list) {
