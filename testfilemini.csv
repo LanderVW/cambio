@@ -1,0 +1,12 @@
++Requests: 2
+req0;z0;0;1072;12;car0,car2;100;20
+req1;z0;0;1072;127;car0;100;100;20
++Zones: 2
+z0;z1
+z1;z0
++Vehicles: 3
+car0
+car1
+car2
++Days: 2
+

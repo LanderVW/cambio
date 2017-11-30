@@ -15,7 +15,7 @@ public class solver {
     private int[][] requestToCar; //uiteindelijk doel: een request aan een auto toekennen
     private int[][] requestToRequest; //Wordt in het begin op gesteld om de overlappende requests makkelijk op te vragen
     private int[][] carToZone; //ook een doel: auto's in een bepaalde zone plaatsen
-    private static final Random random = new Random(); //die 0 zorgt er voor dat random telkens zelfde is
+    private static final Random random = new Random(17); //die 0 zorgt er voor dat random telkens zelfde is
 
     private Solution bestSolution = null;
     private Solution solution = null;
@@ -118,10 +118,9 @@ public class solver {
             if (newPenalty < oldPenalty || newPenalty < bound) {
                 if (newPenalty < bestSolution.getPenalty()) {
                     bestSolution = new Solution(solution);
-                    System.out.println(bestSolution.getPenalty());
+                    System.out.println("het is verbeterd!!");
+                    System.out.println(bestSolution);
                     idle = 0;
-                    System.out.println(solution);
-
                 }
             } else {
                 //niet accepteren
@@ -149,7 +148,7 @@ public class solver {
                     restartCount++;
                     assignCarsToZones();
                 }
-
+                bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
                 break;
             }
 
@@ -203,14 +202,12 @@ public class solver {
     public Integer assignRequestsToVehicles(int[][] carToZone, int[][] requestToCar) {
           /* [meta] init ------------------------------------- */
         int penalty = 0;
-
         for (int i = 0; i < requestList.size(); i++) {
             ArrayList<Integer> possibleVehicles = requestList.get(i).getPossible_vehicle_list();
             boolean assigned = false;
             boolean carAvailable = false;
             for (int j = 0; j < possibleVehicles.size(); j++) {
                 int vehicleID = possibleVehicles.get(j);
-
                 //vehicle is beschikbaar in gevraagde zone, checken indien mogelijk om toe te kennen
                 //er wordt geen penalty aangerekend
                 if (carToZone[vehicleID][requestList.get(i).getZone_id()] == 1) {
@@ -252,18 +249,19 @@ public class solver {
             }
         }
 
-
         return penalty;
 
     }
 
     public void finish() {
 //        todo bereken tijdscost om deze functie uit te voeren (alles moet stoppen voor maxtijd - finishtijd)
-//        System.out.println("best solution: " + bestSolution);
-        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
+        System.out.println("best solution: " + bestSolution);
+//        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
         System.out.println(bestSolution);
         System.out.print("finished met cost: " + bestSolution.getPenalty());
         solveRequestsToVehicles(bestSolution);
+        System.out.println("na het optimal");
+        System.out.println(bestSolution);
         System.out.print("finished met cost: " + bestSolution.getPenalty());
 
     }

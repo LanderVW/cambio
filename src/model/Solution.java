@@ -34,8 +34,12 @@ public class Solution {
     }
 
     public Solution(Solution s) {
-        this.requestToCar = s.getRequestToCar();
-        this.carToZone = s.getCarToZone();
+        this.requestToCar = new int[s.getRequestToCar().length][];
+        for(int i = 0; i < s.getRequestToCar().length; i++)
+            this.requestToCar[i] = s.getRequestToCar()[i].clone();
+        this.carToZone = new int[s.getCarToZone().length][];
+        for(int i = 0; i < s.getCarToZone().length; i++)
+            this.carToZone[i] = s.getCarToZone()[i].clone();
         this.penalty = s.getPenalty();
         this.unassignedRequests = new ArrayList<>();
     }
@@ -165,12 +169,12 @@ public class Solution {
             rc+= '\n';
         }
         String cz = "\n";
-        for (int[] x : carToZone) {
-            for (int y : x) {
-                cz+= (y + " ");
-            }
-            cz+='\n';
-        }
+//        for (int[] x : carToZone) {
+//            for (int y : x) {
+//                cz+= (y + " ");
+//            }
+//            cz+='\n';
+//        }
 
         return "Solution{" +
                 "requestToCar=" + rc +
