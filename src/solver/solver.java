@@ -164,21 +164,54 @@ public class solver {
         Generator generator = new ReplaceMoveGenerator();
         List<ReplaceMove> possibleMoveList= generator.generateRandom(solution, solution.getRequestList(), adjacentZone);
         requestToCar = solution.getRequestToCar();
-        
-        for (ReplaceMove replacemove: possibleMoveList) {
-            requestToCar[replacemove.getNewRequestID()][replacemove.getNewCarID()] = 1;
-            solution.getRequestList().get(replacemove.getNewRequestID()).setCurrentlyPenalty(0);
-            if(checkOverlappingRequests(replacemove.getNewCarID(), replacemove.getNewRequestID())){
-                Request oldrequest = getOverlappingRequest(replacemove.getNewCarID(), replacemove.getNewRequestID(), solution);
-                requestToCar[oldrequest.getRequest_id()][replacemove.getNewCarID()] = 0;
-                solution.getRequestList().get(oldrequest.getRequest_id()).setCurrentlyPenalty(oldrequest.getPenalty1());
+        int [] [] tmpRequestToCar ;
+        Solution tmpSolution;
+        ReplaceMove replaceMove;
+        tmpSolution = new Solution(solution);
+        int iteration = 0;
+        System.out.println("start random request shifting");
+        int idle = 0;
+        while(iteration < 10000){
+            while(idle < 10) {
+                iteration++;
+                idle++;
+                //pick random een move uit
+                replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
+                tmpRequestToCar = copyRequestToCar(tmpSolution.getRequestToCar());
+                tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] = 1;
+                tmpSolution.getRequestList().get(replaceMove.getNewRequestID()).setCurrentlyPenalty(0);
+                while (true) {
+                    if (checkOverlappingRequests(replaceMove.getNewCarID(), replaceMove.getNewRequestID())) {
+                        Request oldrequest = getOverlappingRequest(replaceMove.getNewCarID(), replaceMove.getNewRequestID(), tmpSolution);
+                        if (oldrequest == null) {
+                            break;
+                        }
+                        tmpRequestToCar[oldrequest.getRequest_id()][replaceMove.getNewCarID()] = 0;
+                        tmpSolution.setRequestToCar(tmpRequestToCar);
+                        tmpSolution.getRequestList().get(oldrequest.getRequest_id()).setCurrentlyPenalty(oldrequest.getPenalty1());
+                    }
+
+                }
             }
-            System.out.println("aangepaste solution: " + solution);
-            solution.setRequestToCar(requestToCar);
-            System.out.println("nieuwe kost: " + calculateCost(solution));
-
-
+            System.out.println("new cost: "+ calculateCost(tmpSolution));
+            if(calculateCost(tmpSolution) < solution.getPenalty()){
+                idle = 0;
+                System.out.println("better");
+                bestSolution = tmpSolution;
+                bestSolution.setPenalty(calculateCost(tmpSolution));
+            }
         }
+    }
+    //because otherwise we got equal refereenes
+    private int[][] copyRequestToCar(int[][] requestToCar) {
+        int [][] tmp = new int[requestToCar.length][requestToCar[0].length];
+        for (int i = 0; i < requestToCar.length; i++) {
+            for (int j = 0; j < requestToCar[0].length; j++) {
+                tmp[i][j] = requestToCar[i][j];
+            }
+        }
+
+        return tmp;
     }
 
     public Integer calculateCost(Solution s){
