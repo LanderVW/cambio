@@ -76,6 +76,78 @@ public class solver {
     }
 
 
+    public void simulatedAnealing() {
+        randomCarToZoneAssignment();
+        double temperatuur = 1000;
+        int iterations = 0;
+
+        //clearen requestToCar array
+        for (int i = 0; i < requestToCar.length; i++) {
+            for (int j = 0; j < requestToCar[0].length; j++) {
+                requestToCar[i][j] = 0;
+            }
+        }
+        int verschil = 0;
+        int idle = 0;
+        while (temperatuur > 1) {
+            idle = 0;
+            while (iterations < 10000){
+                switchTwoCars();
+                switchTwoCars();
+                switchTwoCars();
+
+                for (int i = 0; i < requestToCar.length; i++) {
+                    for (int j = 0; j < requestToCar[0].length; j++) {
+                        requestToCar[i][j] = 0;
+                    }
+                }
+                int newPenalty = assignRequestsToVehicles(carToZone, requestToCar);
+                //bereken verschil
+                verschil = newPenalty - solution.getPenalty();
+//                System.out.println(verschil);
+
+                if (verschil <= 0) {
+                    solution = new Solution(requestToCar, carToZone, newPenalty, new ArrayList<>());
+
+                    if (solution.getPenalty() <= bestSolution.getPenalty()) {
+                        bestSolution = solution;
+//                        printInfo();
+                        iterations = 0;
+                    }
+                } else {
+//                    System.out.println(Math.exp((double) (verschil * -1)/(double) temperatuur));
+                    if (1 - Math.exp((double) (verschil * -1) / (double) temperatuur) > 0.03) {
+                        solution = new Solution(requestToCar, carToZone, newPenalty, new ArrayList<>());
+//                        iterations = 0;
+                    }
+                }
+
+
+                iterations++;
+            }
+            iterations = 0;
+
+            temperatuur = temperatuur * 0.95;
+
+        }
+    }
+
+    public void switchTwoCars() {
+        //random move
+//        System.out.println("voor: ");
+//        printInfo();
+        int carSelected = random.nextInt(carList.size());
+        int zone1 = getZoneForCar(carSelected);
+        int zone2 = random.nextInt(carToZone[0].length);
+
+        //omwisselen cars
+        int temp = carToZone[carSelected][zone1];
+        carToZone[carSelected][zone1] = carToZone[carSelected][zone2];
+        carToZone[carSelected][zone2] = temp;
+//        System.out.println("na: ");
+//        printInfo();
+    }
+
     public void assignCarsToZones() {
         int MAX_IDLE = 20000;
         int L = 1000;
@@ -137,8 +209,9 @@ public class solver {
 
             if (count == L) {
                 count = 0;
-                bound = newPenalty;
+                bound = solution.getPenalty();
             }
+
             if (idle >= MAX_IDLE) {
                 //TODO local search binnen assignment van requests aan cars
 
@@ -151,24 +224,22 @@ public class solver {
                 bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
                 break;
             }
-
         }
-
     }
 
-    public void solveRequestsToVehicles(Solution solution){
+    public void solveRequestsToVehicles(Solution solution) {
         //TODO mogelijk fout: aanpassen lijst terwijl doorlopen
         requestLoop:
-        for(Request request : solution.getUnassignedRequests()){
-            if(!request.isCarAvailable()){
+        for (Request request : solution.getUnassignedRequests()) {
+            if (!request.isCarAvailable()) {
                 break;
             }
-            if(request.isOverlap()){
-                for(int vehicleIDUnassigned : request.getPossible_vehicle_list()){
-                    Request currentlyAssignedRequest = getOverlappingRequest(vehicleIDUnassigned,request.getRequest_id(), solution);
+            if (request.isOverlap()) {
+                for (int vehicleIDUnassigned : request.getPossible_vehicle_list()) {
+                    Request currentlyAssignedRequest = getOverlappingRequest(vehicleIDUnassigned, request.getRequest_id(), solution);
 
                     //vehicle overlappende request komt overeen met currently assigned request
-                    if(vehicleIDUnassigned == solution.getRequestToCar()[currentlyAssignedRequest.getRequest_id()][vehicleIDUnassigned]){
+                    if (vehicleIDUnassigned == solution.getRequestToCar()[currentlyAssignedRequest.getRequest_id()][vehicleIDUnassigned]) {
                         //checken indien mogelijk om currently assigned toe te wijzen aan adjacent zone
                         for (int j = 0; j < request.getPossible_vehicle_list().size(); j++) {
                             int vehicleIDCurrently = request.getPossible_vehicle_list().get(j);
@@ -184,7 +255,7 @@ public class solver {
                                     requestToCar[request.getRequest_id()][vehicleIDUnassigned] = 1;
                                     solution.increasePenalty(currentlyAssignedRequest.getPenalty2());
                                     solution.decreasePenalty(request.getPenalty1());
-                                    System.out.println(" gewisseld "+request.getRequest_id() + " met " + currentlyAssignedRequest.getRequest_id());
+                                    System.out.println(" gewisseld " + request.getRequest_id() + " met " + currentlyAssignedRequest.getRequest_id());
                                     break requestLoop;
                                 }
                             }
@@ -194,6 +265,7 @@ public class solver {
             }
         }
     }
+
     /**
      * bereken cost van huidige carToZone
      *
@@ -245,6 +317,8 @@ public class solver {
             }
             if (!assigned) {
                 penalty += requestList.get(i).getPenalty1();
+//                System.out.println("solution: " + solution);
+//                System.out.println("volgende: " + requestList.get(i));
                 solution.addUnassignedRequest(requestList.get(i));
             }
         }
@@ -270,7 +344,6 @@ public class solver {
     /**
      * hulpmethodes
      */
-
 
     private ArrayList searchAdjacentZone(int[] integers, int self) {
         ArrayList lijst = new ArrayList();
@@ -366,8 +439,8 @@ public class solver {
      */
     public void printInfo() {
 //        printen info
-        System.out.println("alle requests");
-        for (Request r : requestList) System.out.println(r);
+//        System.out.println("alle requests");
+//        for (Request r : requestList) System.out.println(r);
 
         System.out.println("cartozone matrix");
         for (int[] x : carToZone) {
