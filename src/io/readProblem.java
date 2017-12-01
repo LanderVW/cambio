@@ -34,6 +34,7 @@ public class readProblem {
     //read in problem and make requests, zones, and zone tot zone matrix
 
     String csvFile = "toy1.csv";
+//    String csvFile = "1_100_7_10_25.csv";
     BufferedReader br = null;
     String line = "";
     String cvsSplitBy = ";";

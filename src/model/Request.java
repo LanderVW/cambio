@@ -8,6 +8,7 @@ public class Request {
     private Integer currentPenalty;
     private boolean overlap;
     private boolean carAvailable;
+    private int currentlyPenalty;
 
     public Request(Integer request_id, int day_index, int start_time, int duration, int penalty1, int penalty2, int zone_id, ArrayList possible_vehicle_list) {
         this.request_id = request_id;
@@ -20,6 +21,10 @@ public class Request {
         this.possible_vehicle_list = possible_vehicle_list;
         this.overlap = false;
         this.carAvailable = false;
+        this.currentlyPenalty = 0;
+    }
+
+    public Request() {
 
     }
 
@@ -34,8 +39,30 @@ public class Request {
                 ", zone_id='" + zone_id + '\'' +
                 ", request_id='" + request_id + '\'' +
                 ", possible vehicles= "+possible_vehicle_list +
-
+                "assigned: " + currentlyPenalty +
                 '}';
+    }
+
+    public int getCurrentlyPenalty() {
+        return currentlyPenalty;
+    }
+
+    @Override
+    public Request clone(){
+        Request r = new Request();
+        r.penalty1 = this.penalty1;
+        r.currentlyPenalty = this.currentlyPenalty;
+        r.carAvailable = this.carAvailable;
+        r.day_index = this.day_index;
+        r.duration = this.duration;
+        r.currentPenalty = this.currentPenalty;
+        r.overlap = this.overlap;
+        r.penalty2 = this.penalty2;
+        r.possible_vehicle_list = this.possible_vehicle_list;
+        r.zone_id = this.zone_id;
+        r.request_id = this.request_id;
+        r.start_time = this.start_time;
+        return r;
     }
 
     public Integer getRequest_id() {
@@ -80,6 +107,14 @@ public class Request {
 
     public int getDuration() {
         return duration;
+    }
+
+    public int isDirectlyAssigned() {
+        return currentlyPenalty;
+    }
+
+    public void setCurrentlyPenalty(int currentlyPenalty) {
+        this.currentlyPenalty = currentlyPenalty;
     }
 
     public void setDuration(int duration) {
