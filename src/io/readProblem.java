@@ -37,7 +37,6 @@ public class readProblem {
 //    String csvFile = "2_210_3_40_25.csv";
 //    String csvFile = "3_300_6_40_25.csv";
 //    String csvFile = "toy1.csv";
-
     BufferedReader br = null;
     String line = "";
     String cvsSplitBy = ";";

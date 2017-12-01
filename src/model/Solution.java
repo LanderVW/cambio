@@ -13,6 +13,7 @@ public class Solution {
     private int[][] carToZone;
     private Integer penalty;
     private List<Request> unassignedRequests;
+    private List<Request> requestList;
 
     public Solution(int[][] requestToCar, int[][] carToZone, Integer penalty) {
         this.requestToCar = requestToCar;
@@ -42,6 +43,7 @@ public class Solution {
             this.carToZone[i] = s.getCarToZone()[i].clone();
         this.penalty = s.getPenalty();
         this.unassignedRequests = new ArrayList<>();
+        this.requestList = s.getRequestList();
     }
 
     public Solution() {
@@ -50,6 +52,20 @@ public class Solution {
         this.carToZone = null;
         this.penalty = null;
 
+    }
+
+
+    public List<Request> getRequestList() {
+        return requestList;
+    }
+//    \List<SomeBean> newList = new ArrayList<SomeBean>(otherList);
+
+
+    public void setRequestList(List<Request> requestList) {
+        this.requestList = new ArrayList<>();
+        for (Request r: requestList) {
+            this.requestList.add(r.clone());
+        }
     }
 
     public int[][] getRequestToCar() {
@@ -169,12 +185,12 @@ public class Solution {
             rc+= '\n';
         }
         String cz = "\n";
-//        for (int[] x : carToZone) {
-//            for (int y : x) {
-//                cz+= (y + " ");
-//            }
-//            cz+='\n';
-//        }
+        for (int[] x : carToZone) {
+            for (int y : x) {
+                cz+= (y + " ");
+            }
+            cz+='\n';
+        }
 
         return "Solution{" +
                 "requestToCar=" + rc +
