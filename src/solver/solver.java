@@ -78,7 +78,7 @@ public class solver {
 
     public void simulatedAnealing() {
         randomCarToZoneAssignment();
-        double temperatuur = 1000;
+        double temperatuur = 500;
         int iterations = 0;
 
         //clearen requestToCar array
@@ -88,16 +88,18 @@ public class solver {
             }
         }
         int verschil = 0;
-        int idle = 0;
+        int aantalNietBeter = 0;
+        boolean beter;
+        int tempLus =0;
         while (temperatuur > 1) {
-            idle = 0;
+            beter = false;
             while (iterations < 10000){
                 switchTwoCars();
                 switchTwoCars();
                 switchTwoCars();
 
                 for (int i = 0; i < requestToCar.length; i++) {
-                    for (int j = 0; j < requestToCar[0].length; j++) {
+                    for (int j = 0; j < requestToCar[0].length; j++){
                         requestToCar[i][j] = 0;
                     }
                 }
@@ -112,24 +114,37 @@ public class solver {
                     if (solution.getPenalty() <= bestSolution.getPenalty()) {
                         bestSolution = solution;
 //                        printInfo();
+                        beter=true;
                         iterations = 0;
                     }
                 } else {
 //                    System.out.println(Math.exp((double) (verschil * -1)/(double) temperatuur));
-                    if (1 - Math.exp((double) (verschil * -1) / (double) temperatuur) > 0.03) {
+                    if (1 - Math.exp((double) (verschil * - 1) / (double) temperatuur) > 0.03) {
                         solution = new Solution(requestToCar, carToZone, newPenalty, new ArrayList<>());
 //                        iterations = 0;
                     }
                 }
-
-
                 iterations++;
             }
             iterations = 0;
+            if(!beter){
+                aantalNietBeter++;
 
+            }else{
+                aantalNietBeter = 0;
+                beter = false;
+            }
+            if(aantalNietBeter > 100){
+                temperatuur = temperatuur + 10;
+                aantalNietBeter = 0;
+            }
+
+            aantalNietBeter++;
             temperatuur = temperatuur * 0.95;
-
+//            System.out.println(aantalNietBeter);
+            tempLus++;
         }
+
     }
 
     public void switchTwoCars() {
