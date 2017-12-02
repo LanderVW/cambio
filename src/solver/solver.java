@@ -3,6 +3,7 @@ package solver;
 import Generator.*;
 import model.Car;
 import model.Request;
+import model.RequestComparator;
 import model.Solution;
 
 import java.util.*;
@@ -16,11 +17,14 @@ public class solver {
     private int[][] requestToCar; //uiteindelijk doel: een request aan een auto toekennen
     private int[][] requestToRequest; //Wordt in het begin op gesteld om de overlappende requests makkelijk op te vragen
     private int[][] carToZone; //ook een doel: auto's in een bepaalde zone plaatsen
-    private static final Random random = new Random(17); //die 0 zorgt er voor dat random telkens zelfde is
-
+    private static final Random random = new Random(); //die 0 zorgt er voor dat random telkens zelfde is
+    private int bestpenaltyBeforelocalsearchonrequest = 0;
     private Solution bestSolution = null;
     private Solution solution = null;
     private int restartCount = 0;
+    private List<Integer> acceptedSolutions;
+    private List<Integer> bounds;
+
 
     public solver(List<Request> requestList, List<Integer> zoneList, List<Car> carList, Integer days, int[][] adjacentZone) {
         this.requestList = requestList;
@@ -28,6 +32,8 @@ public class solver {
         this.carList = carList;
         this.days = days; //weet niet wat nut hiervan is
         this.adjacentZone = adjacentZone;
+        this.acceptedSolutions = new ArrayList<>();
+        this.bounds = new ArrayList<>();
     }
 
     /**
@@ -49,7 +55,26 @@ public class solver {
                 }
             }
         }
-        //randomCarToZoneAssignment();
+        //sorteren van requestlist op basis van duur
+        Collections.sort(requestList, new RequestComparator());
+        Collections.reverse(requestList);
+//        Collections.shuffle(requestList);
+
+    }
+    public List<Integer> getAcceptedSolutions() {
+        return acceptedSolutions;
+    }
+
+    public void setAcceptedSolutions(List<Integer> acceptedSolutions) {
+        this.acceptedSolutions = acceptedSolutions;
+    }
+
+    public List<Integer> getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(List<Integer> bounds) {
+        this.bounds = bounds;
     }
 
     public void randomCarToZoneAssignment() {
@@ -66,11 +91,12 @@ public class solver {
         solution = new Solution(carToZone, requestToCar);
         int penalty = assignRequestsToVehicles(carToZone, requestToCar);
         solution.setPenalty(penalty);
+        solution.setRequestList(this.requestList);
 
-        if (bestSolution == null)
+        if (bestSolution == null) {
             bestSolution = new Solution(solution);
-            bestSolution.setRequestList(this.requestList);
-        System.out.print("init met cost: " + bestSolution.getPenalty());
+        }
+        System.out.println("init met cost: " + bestSolution.getPenalty());
         System.out.println("init met mijne kost: " + calculateCost(bestSolution));
 
 
@@ -117,18 +143,19 @@ public class solver {
             solution.setPenalty(newPenalty);
             solution.setCarToZone(carToZone);
             solution.setRequestToCar(requestToCar);
-            solution.setRequestList(requestList);
 
             if (newPenalty < oldPenalty || newPenalty < bound) {
+                acceptedSolutions.add(newPenalty);
+                idle = 0;
+                //System.out.println(idle);
                 if (newPenalty < bestSolution.getPenalty()) {
+                    solution.setRequestList(requestList);
                     bestSolution = new Solution(solution);
-                    bestSolution.setRequestList(requestList);
-                    System.out.println("het is verbeterd!!" + newPenalty);
-                    System.out.println("mijn penalty: " + calculateCost(bestSolution));
-                    idle = 0;
+
                 }
             } else {
                 //niet accepteren
+                acceptedSolutions.add(oldPenalty);
                 temp = carToZone[carSelected][zone1];
                 carToZone[carSelected][zone1] = carToZone[carSelected][zone2];
                 carToZone[carSelected][zone2] = temp;
@@ -142,10 +169,13 @@ public class solver {
 
             if (count == L) {
                 count = 0;
-                bound = newPenalty;
+                bound = solution.getPenalty();
+                bounds.add(bound);
             }
             if (idle >= MAX_IDLE) {
                 //TODO local search binnen assignment van requests aan cars
+
+
                 while (restartCount < 0) {
                     randomCarToZoneAssignment();
                     restartCount++;
@@ -159,49 +189,75 @@ public class solver {
 
     }
 
-    public void solveRequestsToVehicles(Solution solution) {
+    public void solveRequestsToVehicles(Solution bsolution) {
         //generate al possible moves
         Generator generator = new ReplaceMoveGenerator();
-        List<ReplaceMove> possibleMoveList= generator.generateRandom(solution, solution.getRequestList(), adjacentZone);
-        requestToCar = solution.getRequestToCar();
-        int [] [] tmpRequestToCar ;
+        List<ReplaceMove> possibleMoveList = generator.generateRandom(bsolution, bsolution.getRequestList(), adjacentZone);
+        int [][] tmpRequestToCar ;
         Solution tmpSolution;
         ReplaceMove replaceMove;
-        tmpSolution = new Solution(solution);
         int iteration = 0;
-        System.out.println("start random request shifting");
         int idle = 0;
-        while(iteration < 10000){
-            while(idle < 10) {
-                iteration++;
+        List<Request> overlappingList;
+        int newPenalty = 0;
+        Request tmprequest;
+        boolean better = false;
+        while(iteration < 1000){
+            tmpSolution = new Solution(bsolution);
+//            System.out.println(calculateCost(tmpSolution));
+            tmpRequestToCar = copyRequestToCar(tmpSolution.getRequestToCar());
+            iteration++;
+            idle = 0;
+//            better = false;
+//            System.out.println("new");
+            while(idle < 8 && !better) {
                 idle++;
+                 better = false;
                 //pick random een move uit
                 replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
-                tmpRequestToCar = copyRequestToCar(tmpSolution.getRequestToCar());
+//                while(tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] == 1){
+//                    replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
+//                }
                 tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] = 1;
-                tmpSolution.getRequestList().get(replaceMove.getNewRequestID()).setCurrentlyPenalty(0);
-                while (true) {
-                    if (checkOverlappingRequests(replaceMove.getNewCarID(), replaceMove.getNewRequestID())) {
-                        Request oldrequest = getOverlappingRequest(replaceMove.getNewCarID(), replaceMove.getNewRequestID(), tmpSolution);
-                        if (oldrequest == null) {
-                            break;
-                        }
-                        tmpRequestToCar[oldrequest.getRequest_id()][replaceMove.getNewCarID()] = 0;
-                        tmpSolution.setRequestToCar(tmpRequestToCar);
-                        tmpSolution.getRequestList().get(oldrequest.getRequest_id()).setCurrentlyPenalty(oldrequest.getPenalty1());
+                //requestlistid komt overeen met request id?
+                tmprequest = tmpSolution.getRequestList().get(replaceMove.getNewRequestID());
+                if(replaceMove.isNeededZone()) {
+                    tmprequest.setCurrentlyPenalty(0);
+                }else{
+                    tmprequest.setCurrentlyPenalty(tmprequest.getPenalty2());
+                }
+                overlappingList = getOverlappingRequests(replaceMove.getNewCarID(), replaceMove.getNewRequestID(), tmpSolution);
+                if (overlappingList != null) {
+                    //er is overlap en die moeten allemaal op nul gezet worden
+                    for (Request r : overlappingList) {
+//                        System.out.println("trow out");
+                        tmpRequestToCar[r.getRequest_id()][replaceMove.getNewCarID()] = 0;
+                        //penalty ook zetten
+                        tmpSolution.getRequestList().get(r.getRequest_id()).setCurrentlyPenalty(r.getPenalty1());
                     }
+                }
+                //nieuwe penalty berekenen
+                newPenalty = calculateCost(tmpSolution);
+//                System.out.println("Cost: " + newPenalty);
+                if (newPenalty < bsolution.getPenalty()) {
+                    tmpSolution.setRequestToCar(tmpRequestToCar);
+                    System.out.println("oude best solution" + bsolution);
+                    tmpSolution.setPenalty(newPenalty);
+                    better = true;
+                    System.out.println("better: " + newPenalty);
+                    bsolution = new Solution(tmpSolution);
+                    bsolution.setRequestToCar(tmpRequestToCar);
+                    System.out.println("nieuwe best solution" + tmpSolution);
 
                 }
             }
-            System.out.println("new cost: "+ calculateCost(tmpSolution));
-            if(calculateCost(tmpSolution) < solution.getPenalty()){
-                idle = 0;
-                System.out.println("better");
-                bestSolution = tmpSolution;
-                bestSolution.setPenalty(calculateCost(tmpSolution));
-            }
+            //terugzetten van bewegingen
         }
+//        System.out.println(bsolution);
+        System.out.println("done with local search");
+        bestSolution = new Solution(bsolution);
     }
+
     //because otherwise we got equal refereenes
     private int[][] copyRequestToCar(int[][] requestToCar) {
         int [][] tmp = new int[requestToCar.length][requestToCar[0].length];
@@ -228,6 +284,11 @@ public class solver {
         }
     }
 
+    /**
+     * bereken cost van huidige carToZone
+     *
+     * @return cost
+     */
     public Integer assignRequestsToVehicles(int[][] carToZone, int[][] requestToCar) {
           /* [meta] init ------------------------------------- */
         int penalty = 0;
@@ -242,8 +303,8 @@ public class solver {
                 //er wordt geen penalty aangerekend
                 if (carToZone[vehicleID][requestList.get(i).getZone_id()] == 1) {
                     carAvailable = true;
-                    if (!checkOverlappingRequests(vehicleID, i)) {
-                        requestToCar[i][vehicleID] = 1;
+                    if (!checkOverlappingRequests(vehicleID, requestList.get(i).getRequest_id())) {
+                        requestToCar[requestList.get(i).getRequest_id()][vehicleID] = 1;
                         assigned = true;
                         break;
                     } else {
@@ -255,6 +316,7 @@ public class solver {
 
             //checken indien vehicle uit possiblevehiclelist vrij in adjacent zone
             if (!assigned) {
+
                 for (int j = 0; j < possibleVehicles.size(); j++) {
                     int vehicleID = possibleVehicles.get(j);
                     int carZone = getZoneForCar(vehicleID, carToZone);
@@ -262,12 +324,13 @@ public class solver {
                     //checken indien voertuig zich in adjacent zone van de request bevindt
 
                     if (adjacentZone[carZone][requestZone] == 1) {
-                        //zone waarin car zich bevindt is een aangrenzende zone van requestZone --penalty2
-                        if (!checkOverlappingRequests(vehicleID, i)) {
-                            requestToCar[i][vehicleID] = 1;
+                        //zone waarin car zich bevindt is een aangrenzende zone van requestZone
+                        if (!checkOverlappingRequests(vehicleID, requestList.get(i).getRequest_id())) {
+                            requestToCar[requestList.get(i).getRequest_id()][vehicleID] = 1;
                             assigned = true;
                             penalty += requestList.get(i).getPenalty2();
                             requestList.get(i).setCurrentlyPenalty(requestList.get(i).getPenalty2());
+
                             break;
                         }
                     }
@@ -275,9 +338,8 @@ public class solver {
                 }
             }
             if (!assigned) {
-                //helemaal niet assigned
-                penalty += requestList.get(i).getPenalty1();
                 requestList.get(i).setCurrentlyPenalty(requestList.get(i).getPenalty1());
+                penalty += requestList.get(i).getPenalty1();
                 solution.addUnassignedRequest(requestList.get(i));
             }
         }
@@ -288,14 +350,16 @@ public class solver {
 
     public void finish() {
 //        todo bereken tijdscost om deze functie uit te voeren (alles moet stoppen voor maxtijd - finishtijd)
-        System.out.println("best solution: " + bestSolution);
-//        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
-        System.out.print("finished met cost: " + bestSolution.getPenalty());
-        System.out.println(bestSolution.getRequestList());
+//        System.out.println("best solution: " + bestSolution);
+        System.out.println("Cars to zone met cost: " + bestSolution.getPenalty());
+//        System.out.println(bestSolution.getRequestList());
+        bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
         solveRequestsToVehicles(bestSolution);
-        System.out.println("na het optimal");
-        System.out.println(bestSolution);
-        System.out.print("finished met cost: " + bestSolution.getPenalty());
+//        System.out.println("the best was: " + bestpenaltyBeforelocalsearchonrequest);
+        System.out.println("the best is after local search: " + bestSolution.getPenalty());
+        bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
+//        System.out.println("na het optimal");
+//        System.out.println(bestSolution);
 
     }
 
@@ -383,12 +447,16 @@ public class solver {
         return false;
     }
 
-    private Request getOverlappingRequest(int vehicleID, int requestID, Solution solution) {
+    private List<Request> getOverlappingRequests(int vehicleID, int requestID, Solution solution) {
+        List<Request> tmpList = new ArrayList<>();
         for (int i = 0; i < requestList.size(); i++) {
             //car vervult nog een andere request; checken indien deze overlapt met de request die we nu willen toekennen
             if (solution.getRequestToCar()[i][vehicleID] == 1 && requestToRequest[i][requestID] == 1) {
-                return requestList.get(i);
+                tmpList.add(requestList.get(i));
             }
+        }
+        if(tmpList.size() != 0) {
+            return tmpList;
         }
         return null;
     }

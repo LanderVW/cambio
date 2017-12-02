@@ -53,14 +53,14 @@ public class ReplaceMoveGenerator implements Generator{
                 int currentZoneForCar = getZoneForCar(possibleCarID, s.getCarToZone());
                 if(currentZoneForCar == request.getZone_id()){
 //                    System.out.println("We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
-                    moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id()));
+                    moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id(), true));
                     self = true;
                 }
                 for (int adjacentzone : getAdjacentZone(request.getZone_id())) {
                     if (currentZoneForCar == adjacentzone) {
                         if(!self) {
 //                            System.out.println("Adjacent: We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
-                            moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id()));
+                            moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id(), false));
                         }
                     }
                 }

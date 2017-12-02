@@ -11,6 +11,7 @@ public class ReplaceMove extends Move {
     private int oldRequestID;
     private int newCarID;
     private int newRequestID;
+    boolean neededZone;
 
     public ReplaceMove(Integer oldCarID, Integer oldRequestID, Integer newCarID, Integer newRequestID) {
         this.oldCarID = oldCarID;
@@ -19,9 +20,10 @@ public class ReplaceMove extends Move {
         this.newRequestID = newRequestID;
     }
 
-    public ReplaceMove(int newCarID, int newRequestID) {
+    public ReplaceMove(int newCarID, int newRequestID, boolean neededZone) {
         this.newCarID = newCarID;
         this.newRequestID = newRequestID;
+        this.neededZone = neededZone;
     }
 
     public Integer getOldCarID() {
@@ -42,6 +44,14 @@ public class ReplaceMove extends Move {
 
     public Integer getNewCarID() {
         return newCarID;
+    }
+
+    public boolean isNeededZone() {
+        return neededZone;
+    }
+
+    public void setNeededZone(boolean neededZone) {
+        this.neededZone = neededZone;
     }
 
     public void setNewCarID(Integer newCarID) {
