@@ -204,4 +204,13 @@ public class Solution {
                 ", penalty=" + penalty +
                 '}';
     }
+
+    public void setRequestToCarDeep(int[][] requestToCarDeep) {
+        this.requestToCar = new int[requestToCarDeep.length][requestToCarDeep[0].length];
+        for(int i = 0; i < requestToCarDeep.length; i++){
+            for (int j = 0; j < requestToCarDeep[0].length; j++) {
+                this.requestToCar[i][j] = requestToCarDeep[i][j];
+            }
+        }
+    }
 }
