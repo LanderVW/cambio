@@ -135,10 +135,12 @@ public class solver {
                 if (newPenalty < bestSolution.getPenalty()) {
                     solution.setRequestList(requestList);
                     bestSolution = new Solution(solution);
+
                     for(int i = 0; i < requestToCar.length; i++){
                         this.bestRequestTocar[i] = requestToCar[i].clone();
                     }
 
+//                    System.out.println(getCost(this.requestToCar));
 
                 }
             } else {
@@ -172,6 +174,29 @@ public class solver {
                 break;
             }
         }
+    }
+
+    public Integer getCost(int[][] requesttocar) {
+        int penalty = 0;
+        Request tmp;
+        boolean found = false;
+        for (int i = 0; i < requesttocar.length; i++) {
+            found = false;
+            tmp = findRequestForId(i);
+            for (int j = 0; j < requesttocar[0].length; j++) {
+                if(requesttocar[i][j] == 1){
+                    found = true;
+                    if(getZoneForCar(j, this.carToZone) != tmp.getZone_id() ){
+                        penalty+= tmp.getPenalty2();
+                    }
+                }
+
+            }
+            if(found == false){
+                penalty += tmp.getPenalty1();
+            }
+        }
+        return penalty;
     }
 
     public void solveRequestsToVehicles(Solution bsolution) {
@@ -259,23 +284,25 @@ public class solver {
         int idle = 0;
         List<Request> overlappingList;
         int newPenalty = 0;
+        Request tmprequest;
         boolean better = false;
         System.out.println("Axel's cost net voor LS " + getCost(this.bestRequestTocar));
-        while (iteration < 1000000) {
+        while (iteration < 100000) {
             for(int i = 0; i < this.bestRequestTocar.length; i++){
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
+
             iteration++;
             idle = 0;
             better = false;
 //            System.out.println("new");
-            while (idle < 5 && !better) {
+            while (idle < 10 && !better) {
                 idle++;
                 //pick random een move uit
                 replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
-                while(tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] == 1){
-                    replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
-                }
+//                while(tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] == 1){
+//                    replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
+//                }
                 tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] = 1;
                 //requestlistid komt overeen met request id?
 
@@ -350,29 +377,7 @@ public class solver {
         }
     }
 
-    //op basis van requesttocar
-    public Integer getCost(int[][] requesttocar) {
-        int penalty = 0;
-        Request tmp;
-        boolean found = false;
-        for (int i = 0; i < requesttocar.length; i++) {
-            found = false;
-            tmp = findRequestForId(i);
-            for (int j = 0; j < requesttocar[0].length; j++) {
-                if(requesttocar[i][j] == 1){
-                    found = true;
-                    if(getZoneForCar(j, carToZone) != tmp.getZone_id() ){
-                        penalty+= tmp.getPenalty2();
-                    }
-                }
 
-            }
-            if(found == false){
-                penalty += tmp.getPenalty1();
-            }
-        }
-        return penalty;
-    }
 
     private Request findRequestForId(int s){
         for (Request r: requestList
