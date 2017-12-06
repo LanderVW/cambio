@@ -9,9 +9,9 @@ public class Main {
         //oplossen
         solver solver = new solver(r.getRequestList(), r.getZoneList(), r.getCarList(), r.getDays(), r.getAdjacentZone());
         solver.init();
-//        solver.assignCarsToZones();
+        solver.assignCarsToZones();
 
-        solver.simulatedAnealing();
+//        solver.simulatedAnealing();
 
         solver.finish();
     }

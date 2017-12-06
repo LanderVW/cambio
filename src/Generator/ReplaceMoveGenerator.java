@@ -20,16 +20,16 @@ public class ReplaceMoveGenerator implements Generator{
         int [] zonearray = adjacentZone[zone];
         List<Integer> adjacentzonelist = new ArrayList<>();
         int lengte = zonearray.length;
-        for (int i = 0; i < zone ; i++) {
+        for (int i = 0; i < lengte ; i++) {
             if(zonearray[i] == 1){
-                adjacentzonelist.add(zonearray[i]);
+                adjacentzonelist.add(i);
             }
         }
         return adjacentzonelist;
     }
 
     public Integer getZoneForCar(int car, int [][]carToZone) {
-        for (int i = 0; i < carToZone.length; i++) {
+        for (int i = 0; i < carToZone[0].length; i++) {
             if (carToZone[car][i] == 1) {
                 return i;
             }
@@ -52,16 +52,15 @@ public class ReplaceMoveGenerator implements Generator{
                 //als de auto staat in adj zone of in de zone dat moet --> in de lijst
                 int currentZoneForCar = getZoneForCar(possibleCarID, s.getCarToZone());
                 if(currentZoneForCar == request.getZone_id()){
-                    System.out.println("We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
-                    moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id()));
+//                    System.out.println("We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
+                    moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id(), true));
                     self = true;
                 }
-                for (int adjacentzone : getAdjacentZone(currentZoneForCar)) {
-                    if (request.getZone_id() == adjacentzone) {
+                for (int adjacentzone : getAdjacentZone(request.getZone_id())) {
+                    if (currentZoneForCar == adjacentzone) {
                         if(!self) {
-                            System.out.println("Adjacent: We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
-
-                            moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id()));
+//                            System.out.println("Adjacent: We kunnen request " + request.getRequest_id() + " ook zetten bij car: " + possibleCarID + " in de zone: " + currentZoneForCar);
+                            moveList.add(new ReplaceMove(possibleCarID, request.getRequest_id(), false));
                         }
                     }
                 }
