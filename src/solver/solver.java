@@ -78,7 +78,6 @@ public class solver {
         //printInfo();
     }
 
-
     public void simulatedAnealing() {
         randomCarToZoneAssignment();
         double temperatuur = 500;
@@ -150,7 +149,7 @@ public class solver {
 
     }
 
-    public void switchTwoCars() {
+    public void switchTwoCars(){
         //random move
 //        System.out.println("voor: ");
 //        printInfo();
