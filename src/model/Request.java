@@ -2,7 +2,7 @@ package model;
 
 import java.util.ArrayList;
 
-public class Request {
+public class Request{
     private int day_index, start_time, duration, penalty1, penalty2, zone_id, request_id;
     private ArrayList<Integer> possible_vehicle_list;
     private Integer currentPenalty;
@@ -186,4 +186,5 @@ public class Request {
         }
         return false;
     }
+
 }

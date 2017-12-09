@@ -36,9 +36,9 @@ public class Solution {
 
     public Solution(Solution s) {
         this.requestToCar = new int[s.getRequestToCar().length][];
-        for(int i = 0; i < s.getRequestToCar().length; i++)
+        for(int i = 0; i < s.getRequestToCar().length; i++) {
             this.requestToCar[i] = s.getRequestToCar()[i].clone();
-
+        }
         this.carToZone = new int[s.getCarToZone().length][];
         for(int i = 0; i < s.getCarToZone().length; i++)
             this.carToZone[i] = s.getCarToZone()[i].clone();
