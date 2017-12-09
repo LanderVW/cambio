@@ -183,15 +183,16 @@ public class solver {
         Request tmprequest;
         boolean better = false;
         System.out.println("Axel's kost net voor ls request to car: " + getCost(bestRequestTocar));
-        while (iteration < 1000000) {
+        while (iteration < 10000) {
             for(int i = 0; i < this.bestRequestTocar.length; i++){
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
             iteration++;
             idle = 0;
             better = false;
+            Integer oldcar=0;
 //            System.out.println("new");
-            while (idle < 6 && !better) {
+            while (idle < 5 && !better) {
                 idle++;
                 //pick random een move uit
 //                System.out.println("current penalty: " + getCost(tmpRequestToCar));
@@ -199,8 +200,13 @@ public class solver {
 //                while(tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] == 1){
 //                    replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
 //                }
+
+                for (int i = 0; i < carList.size(); i++) {
+                    if(tmpRequestToCar[replaceMove.getNewRequestID()][i] == 1){
+                        tmpRequestToCar[replaceMove.getNewRequestID()][i] = 0;
+                    }
+                }
                 tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] = 1;
-                //requestlistid komt overeen met request id?
 
                 overlappingList = getOverlappingRequestList(replaceMove.getNewCarID(), replaceMove.getNewRequestID(), tmpRequestToCar);
                 if (overlappingList != null) {
@@ -213,6 +219,7 @@ public class solver {
                 }
                 //nieuwe penalty berekenen
                 newPenalty = getCost(tmpRequestToCar);
+
 //                System.out.println("Cost: " + newPenalty);
                 if (newPenalty < bestpenaltyBeforelocalsearchonrequest) {
 //                    System.out.println(replaceMove);
@@ -224,6 +231,13 @@ public class solver {
                     }
                     bestpenaltyBeforelocalsearchonrequest = newPenalty;
 
+                }
+
+                if(newPenalty > bestpenaltyBeforelocalsearchonrequest +150){
+                    //discard changes becaut too bad
+                    for(int i = 0; i < this.bestRequestTocar.length; i++){
+                        tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
+                    }
                 }
             }
             //terugzetten van bewegingen
@@ -241,6 +255,7 @@ public class solver {
         System.out.println("Cars to zone met cost: " + bestSolution.getPenalty());
         bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
 //        bestSolution.setRequestList(requestList);
+//        solveRequestsToVehicles(bestSolution);
         solveRequestsToCars(bestSolution);
 //        System.out.println("the best was: " + bestpenaltyBeforelocalsearchonrequest);
 //        System.out.println("the best is after local search: " + bestSolution.getPenalty());
@@ -425,7 +440,7 @@ public class solver {
         for (int i = 0; i < requestList.size(); i++) {
             //car vervult nog een andere request; checken indien deze overlapt met de request die we nu willen toekennen
             if (tmpRequestToCar[i][vehicleID] == 1 && requestToRequest[i][requestID] == 1) {
-                tmpList.add(requestList.get(i));
+                tmpList.add(findRequestForId(i));
             }
         }
         if (tmpList.size() != 0) {
@@ -585,10 +600,11 @@ public class solver {
                 }
                 //nieuwe penalty berekenen
                 newPenalty = calculateCost(tmpSolution);
+                newPenalty = getCost(tmpRequestToCar);
 //                System.out.println("Cost: " + newPenalty);
                 if (newPenalty < bsolution.getPenalty()) {
-                    System.out.println(replaceMove);
-                    System.out.println("hoe was het vroeger: " + bestSolution);
+//                    System.out.println(replaceMove);
+//                    System.out.println("hoe was het vroeger: " + bestSolution);
                     tmpSolution.setRequestToCar(tmpRequestToCar);
                     tmpSolution.setPenalty(newPenalty);
                     better = true;
@@ -597,7 +613,9 @@ public class solver {
                     bsolution.setRequestToCar(tmpRequestToCar);
                     System.out.println("cost met axels ding op de 1e manier: " + getCost(bsolution.getRequestToCar()));
                     bestSolution = new Solution(bsolution);
-                    break;
+                    bestSolution.setRequestToCar(tmpRequestToCar);
+                    tmpSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
+
                 }
             }
             //terugzetten van bewegingen
