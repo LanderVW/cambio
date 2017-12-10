@@ -3,14 +3,31 @@ import solver.solver;
 
 public class Main {
     public static void main(String[] args) {
+        long startUpTime = 0;
+        long startTime = System.currentTimeMillis();
         //inlezen
         readProblem r = new readProblem();
         r.readIn();
         //oplossen
         solver solver = new solver(r.getRequestList(), r.getZoneList(), r.getCarList(), r.getDays(), r.getAdjacentZone());
         solver.init();
-//        solver.solve();
-        solver.assignCarsToZones();
+        long endTime = System.currentTimeMillis();
+        startUpTime = endTime - startTime;
+        long duration = startUpTime;
+
+        while(duration < 50000){
+            startTime = System.currentTimeMillis();
+            solver.reset();
+            solver.assignCarsToZones();
+            endTime = System.currentTimeMillis();
+            duration += (endTime - startTime);
+        }
+
+
+//        solver.assignCarsToZones();
+//        solver.assignCarsToZones();
+        System.out.println(duration);
         solver.finish();
+        System.out.println(duration);
     }
 }
