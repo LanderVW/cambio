@@ -25,6 +25,10 @@ public class solver {
     private List<Integer> bounds;
     private int[][] bestRequestTocar;
 
+
+    public solver() {
+    }
+
     public solver(List<Request> requestList, List<Integer> zoneList, List<Car> carList, Integer days, int[][] adjacentZone) {
         this.requestList = requestList;
         this.zoneList = zoneList;
@@ -82,15 +86,15 @@ public class solver {
         if (bestSolution == null) {
             bestSolution = new Solution(solution);
         }
-        System.out.println("init met cost: " + bestSolution.getPenalty());
-        for(int i = 0; i < requestToCar.length; i++){
+//        System.out.println("init met cost: " + bestSolution.getPenalty());
+        for (int i = 0; i < requestToCar.length; i++) {
             this.bestRequestTocar[i] = requestToCar[i].clone();
         }
     }
 
     public void assignCarsToZones() {
-        int MAX_IDLE = 100;
-        int L = 1000;
+        int MAX_IDLE = 10;
+        int L = 10;
 
         //initial solution
         randomCarToZoneAssignment();
@@ -126,17 +130,21 @@ public class solver {
             solution.setPenalty(newPenalty);
             solution.setCarToZone(carToZone);
             solution.setRequestToCar(requestToCar);
+
             if (newPenalty < oldPenalty || newPenalty < bound) {
+//                acceptSolution(newPenalty);
+
                 acceptedSolutions.add(newPenalty);
                 idle = 0;
                 //System.out.println(idle);
                 if (newPenalty < bestSolution.getPenalty()) {
                     solution.setRequestList(requestList);
                     bestSolution = new Solution(solution);
-                    for(int i = 0; i < requestToCar.length; i++){
+                    for (int i = 0; i < requestToCar.length; i++) {
                         this.bestRequestTocar[i] = requestToCar[i].clone();
                     }
                 }
+
             } else {
                 //niet accepteren
                 acceptedSolutions.add(oldPenalty);
@@ -145,6 +153,7 @@ public class solver {
                 carToZone[carSelected][zone2] = temp;
                 solution.setPenalty(oldPenalty);
                 idle++;
+
             }
 
             //update
@@ -159,17 +168,24 @@ public class solver {
             if (idle >= MAX_IDLE) {
                 //TODO local search binnen assignment van requests aan cars
 
-                while (restartCount < 0) {
+                while (restartCount < 2) {
                     randomCarToZoneAssignment();
                     restartCount++;
+
                     assignCarsToZones();
                 }
+
                 bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
                 break;
             }
         }
     }
 
+    /**
+     * localsearch voor requests to car
+     *
+     * @param bsolution
+     */
     public void solveRequestsToCars(Solution bsolution) {
         //generate al possible moves
         Generator generator = new ReplaceMoveGenerator();
@@ -182,15 +198,15 @@ public class solver {
         int newPenalty = 0;
         Request tmprequest;
         boolean better = false;
-        System.out.println("Axel's kost net voor ls request to car: " + getCost(bestRequestTocar));
-        while (iteration < 10000) {
-            for(int i = 0; i < this.bestRequestTocar.length; i++){
+        System.out.println("cost voor ls request to car: " + getCost(bestRequestTocar));
+        while (iteration < 10) {
+            for (int i = 0; i < this.bestRequestTocar.length; i++) {
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
             iteration++;
             idle = 0;
             better = false;
-            Integer oldcar=0;
+            Integer oldcar = 0;
 //            System.out.println("new");
             while (idle < 5 && !better) {
                 idle++;
@@ -243,11 +259,11 @@ public class solver {
             //terugzetten van bewegingen
         }
 //        System.out.println(bsolution);
-        System.out.println("done with local search");
+//        System.out.println("done with local search");
         bestSolution = new Solution(bsolution);
         bestSolution.setPenalty(bestpenaltyBeforelocalsearchonrequest);
+//        System.out.println("best solution set");
     }
-
 
     public void finish() {
 //        todo bereken tijdscost om deze functie uit te voeren (alles moet stoppen voor maxtijd - finishtijd)
@@ -317,14 +333,10 @@ public class solver {
         return null;
     }
 
-    public solver() {
-    }
-
-
-    private Request findRequestForId(int s){
-        for (Request r: requestList
+    private Request findRequestForId(int s) {
+        for (Request r : requestList
                 ) {
-            if(r.getRequest_id() == s){
+            if (r.getRequest_id() == s) {
                 return r;
             }
         }
@@ -503,15 +515,15 @@ public class solver {
             found = false;
             tmp = findRequestForId(req);
             for (int car = 0; car < requesttocar[0].length; car++) {
-                if(requesttocar[req][car] == 1){
+                if (requesttocar[req][car] == 1) {
                     found = true;
 //                    System.out.println(getZoneForCar(car, bestSolution.getCarToZone()));
-                    if(getZoneForCar(car, bestSolution.getCarToZone()) != tmp.getZone_id() ){
-                        penalty+= tmp.getPenalty2();
+                    if (getZoneForCar(car, bestSolution.getCarToZone()) != tmp.getZone_id()) {
+                        penalty += tmp.getPenalty2();
                     }
                 }
             }
-            if(found == false){
+            if (found == false) {
                 penalty += tmp.getPenalty1();
             }
         }
