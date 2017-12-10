@@ -215,7 +215,7 @@ public class solver {
         Request tmprequest;
         boolean better = false;
         System.out.println("kost net voor ls request to car: " + getCost(bestRequestTocar));
-        while (iteration < 1000) {
+        while (iteration < 10000) {
             for (int i = 0; i < this.bestRequestTocar.length; i++) {
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
@@ -261,26 +261,6 @@ public class solver {
                     for (int i = 0; i < tmpRequestToCar.length; i++) {
                         this.bestRequestTocar[i] = tmpRequestToCar[i].clone();
                     }
-//                    List<Request> testlijst = new ArrayList<>();
-//                    boolean assigned = false;
-//                    for (int request = 0; request < requestList.size(); request++) {
-//                        assigned = false;
-//                        for (int car = 0; car < carList.size(); car++) {
-//                            if(this.bestRequestTocar[request][car] != 0){
-//                                assigned = true;
-//                                break;
-//                            }
-//                        }
-//                        if(!assigned){
-//                            testlijst.add(requestList.get(request));
-//                        }
-//                    }
-//                    System.out.println(testlijst.size());
-//                    if(getCost(bestRequestTocar) < bestSolution.getPenalty()){
-//                        bestSolution = new Solution(this.bestRequestTocar, carToZone, newPenalty, testlijst);
-//                    }
-
-
                     bestpenaltyBeforelocalsearchonrequest = newPenalty;
 
                 }
