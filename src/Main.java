@@ -15,12 +15,13 @@ public class Main {
         startUpTime = endTime - startTime;
         long duration = startUpTime;
 
-        while(duration < 50000){
+        while(duration < 30000){
             startTime = System.currentTimeMillis();
             solver.reset();
             solver.assignCarsToZones();
             endTime = System.currentTimeMillis();
             duration += (endTime - startTime);
+            System.out.println("duration:" + duration);
         }
 
 
