@@ -28,7 +28,7 @@ public class Main {
 //        solver.assignCarsToZones();
 //        solver.assignCarsToZones();
         System.out.println(duration);
-        solver.finish();
-        System.out.println(duration);
+//        solver.finish();
+//        System.out.println(duration);
     }
 }
