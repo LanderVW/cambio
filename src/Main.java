@@ -23,12 +23,8 @@ public class Main {
             duration += (endTime - startTime);
             System.out.println("duration:" + duration);
         }
+        solver.reset();
+        solver.assignCarsToZones();
 
-
-//        solver.assignCarsToZones();
-//        solver.assignCarsToZones();
-        System.out.println(duration);
-//        solver.finish();
-        System.out.println(duration);
     }
 }

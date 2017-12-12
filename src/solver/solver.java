@@ -171,8 +171,8 @@ public class solver {
                         this.bestRequestTocar[i] = requestToCar[i].clone();
                     }
                     saveBest(carList.size(), requestList.size(), zoneList.size());
-//                    bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
-//                    solveRequestsToCars(bestSolution);
+                    bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
+                    solveRequestsToCars(bestSolution);
                 }
             } else {
                 //niet accepteren
@@ -195,27 +195,27 @@ public class solver {
             }
             if (idle >= MAX_IDLE) {
                 //TODO local search binnen assignment van requests aan cars
-//                bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
-//                solveRequestsToCars(bestSolution);
-                while (restartCount < 5) {
-                    randomCarToZoneAssignment();
-                    restartCount++;
-                    assignCarsToZones();
-                }
+                bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
+                solveRequestsToCars(bestSolution);
+//                while (restartCount < 5) {
+//                    randomCarToZoneAssignment();
+//                    restartCount++;
+//                    assignCarsToZones();
+//                }
                 saveBest(carList.size(), requestList.size(), zoneList.size());
 //                bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
                 break;
             }
         }
-        System.out.println(globalBestSolution);
+        System.out.println("globalbestsolution" + globalBestSolution);
     }
 
     private void saveBest(int numberOfCars, int numberOfRequests, int numberOfZones) {
         if(bestSolution.getPenalty() < globalBestSolution){
             bestSolution.setRequestToCar(bestRequestTocar);
-            System.out.println("best:" + globalBestSolution);
-//            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones);
-            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones, carList, requestList);
+      //      System.out.println("best:" + globalBestSolution);
+            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones);
+//            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones, carList, requestList);
 
             globalBestSolution = bestSolution.getPenalty();
         }
@@ -235,7 +235,7 @@ public class solver {
         Request tmprequest;
         boolean better = false;
 //        System.out.println("kost net voor ls request to car: " + getCost(bestRequestTocar));
-        while (iteration < 2000) {
+        while (iteration < 100) {
             for (int i = 0; i < this.bestRequestTocar.length; i++) {
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
@@ -244,7 +244,7 @@ public class solver {
             better = false;
             Integer oldcar = 0;
 //            System.out.println("new");
-            while (idle < 10 && !better) {
+            while (idle < 5 && !better) {
                 idle++;
                 //pick random een move uit
 //                System.out.println("current penalty: " + getCost(tmpRequestToCar));
