@@ -80,8 +80,8 @@ public class solver {
             }
         }
         //sorteren van requestlist op basis van duur
-//        Collections.sort(requestList, new RequestComparator());
-   //     Collections.reverse(requestList);
+        Collections.sort(requestList, new RequestComparator());
+        Collections.reverse(requestList);
 //        Collections.shuffle(requestList);
     }
 

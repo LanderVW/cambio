@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="cambio.git:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/cambio_git_jar</output-path>
-    <root id="archive" name="cambio.git.jar">
-      <element id="module-output" name="cambio.git" />
-    </root>
-  </artifact>
-</component>

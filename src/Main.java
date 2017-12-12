@@ -3,16 +3,6 @@ import solver.solver;
 
 public class Main {
     public static void main(String[] args) {
-        String inputfilepath = args[0];
-        String solutionfilepath = args[1];
-        String randomSeed = args[2];
-        String timeLimit = args[3];
-        String num_threads = args[4];
-        System.out.println(inputfilepath + "\n"
-                + solutionfilepath + "\n"
-                + randomSeed + "\n"
-                + timeLimit + "\n"
-                + num_threads + "\n");
         long startUpTime = 0;
         long startTime = System.currentTimeMillis();
         //inlezen
