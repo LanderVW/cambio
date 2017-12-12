@@ -34,11 +34,11 @@ type of csv:
 public class readProblem {
     //read in problem and make requests, zones, and zone tot zone matrix
 
-    String csvFile = "toy1.csv";
-//    String csvFile = "1_100_7_10_25.csv";
+//    String csvFile = "toy1.csv";
+//   String csvFile = "1_100_7_10_25.csv";
 //    String csvFile = "2_210_3_40_25.csv";
-//    String csvFile = "3_300_6_40_25.csv";
-//    String csvFile = "gent9zones648requests.csv";
+ //   String csvFile = "3_300_6_40_25.csv";
+    String csvFile = "gent9zones648requests.csv";
     //    String csvFile = "gent9zones1108requests.csv";
     //    String csvFile = "gent34zones1108requests.csv";
 //    String csvFile = "Hasselt10zones294requests.csv";
@@ -89,7 +89,7 @@ public class readProblem {
 
                 possible_car_list = new ArrayList();
                 for (Integer j = 0; j < possible_vehicle_list.length; j++) {
-//                    nummerplaat zonder spatie
+//                    nummerplaat met spatie
 //                    System.out.println();
                     possible_car_list.add(pos_veh_list.get(j));
 //                    possible_car_list.add(possible_vehicle_list[j].replaceAll("@@", ""));

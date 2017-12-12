@@ -15,16 +15,24 @@ public class Main {
         startUpTime = endTime - startTime;
         long duration = startUpTime;
         System.out.println("start");
-        while(duration < 10000){
+        while(duration < 1000){
             startTime = System.currentTimeMillis();
             solver.reset();
             solver.assignCarsToZones();
+            //solver.solveRequestsToCars(solver.bestSolution);
             endTime = System.currentTimeMillis();
             duration += (endTime - startTime);
             System.out.println("duration:" + duration);
+            System.out.println(solver.getAcceptedSolutions().size());
         }
         solver.reset();
         solver.assignCarsToZones();
 
+
+//        solver.assignCarsToZones();
+//        solver.assignCarsToZones();
+        System.out.println(duration);
+//        solver.finish();
+//        System.out.println(duration);
     }
 }
