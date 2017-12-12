@@ -19,9 +19,11 @@ public class Main {
             startTime = System.currentTimeMillis();
             solver.reset();
             solver.assignCarsToZones();
+            //solver.solveRequestsToCars(solver.bestSolution);
             endTime = System.currentTimeMillis();
             duration += (endTime - startTime);
             System.out.println("duration:" + duration);
+            System.out.println(solver.getAcceptedSolutions().size());
         }
 
 

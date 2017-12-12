@@ -3,6 +3,7 @@ package solver;
 import Generator.*;
 import model.Car;
 import model.Request;
+import model.RequestComparator;
 import model.Solution;
 
 import java.util.*;
@@ -18,7 +19,7 @@ public class solver {
     private int[][] carToZone; //ook een doel: auto's in een bepaalde zone plaatsen
     private static final Random random = new Random(); //die 0 zorgt er voor dat random telkens zelfde is
     private int bestpenaltyBeforelocalsearchonrequest = 0;
-    private Solution bestSolution = null;
+    public Solution bestSolution = null;
     private Solution solution = null;
     private int restartCount = 0;
     private List<Integer> acceptedSolutions;
@@ -63,8 +64,8 @@ public class solver {
             }
         }
         //sorteren van requestlist op basis van duur
-//        Collections.sort(requestList, new RequestComparator());
-//        Collections.reverse(requestList);
+        Collections.sort(requestList, new RequestComparator());
+        Collections.reverse(requestList);
 //        Collections.shuffle(requestList);
     }
 
@@ -98,8 +99,8 @@ public class solver {
 
     public void assignCarsToZones() {
         System.out.println("Start with assigning cars to zones");
-        int MAX_IDLE = 1000;
-        int L = 5000;
+        int MAX_IDLE = 5000;
+        int L = 1000;
 
         //initial solution
         randomCarToZoneAssignment();
@@ -149,9 +150,10 @@ public class solver {
                     }
                     bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
 //                    System.out.println("better in jonas: " + numberOfBetterAssignCarsToZones);
-                    if(numberOfBetterAssignCarsToZones > 25 ) {
+                    if(numberOfBetterAssignCarsToZones > 20 ) {
                         saveBest(carList.size(), requestList.size(), zoneList.size());
                         solveRequestsToCars(bestSolution);
+                        numberOfBetterAssignCarsToZones = 0;
                     }
                 }
             } else {
@@ -177,7 +179,7 @@ public class solver {
                 System.out.println("max idle");
                 //TODO local search binnen assignment van requests aan cars
                 bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
-//                solveRequestsToCars(bestSolution);
+                solveRequestsToCars(bestSolution);
                 bestpenaltyBeforelocalsearchonrequest = 0;
                 saveBest(carList.size(), requestList.size(), zoneList.size());
 //                bestSolution.saveToCSV(carList.size(), requestList.size(), zoneList.size());
@@ -211,7 +213,7 @@ public class solver {
         boolean better = false;
 //        System.out.println("kost net voor ls request to car: " + getCost(bestRequestTocar));
         System.out.println("Start requests to cars on penalty: " + bestpenaltyBeforelocalsearchonrequest);
-        while (iteration < 2000) {
+        while (iteration < 5000) {
             for (int i = 0; i < this.bestRequestTocar.length; i++) {
                 tmpRequestToCar[i] = this.bestRequestTocar[i].clone();
             }
@@ -253,7 +255,7 @@ public class solver {
 //                    System.out.println(replaceMove);
 //                    System.out.println("hoe was het vroeger: " + bestSolution);
                     better = true;
-//                    System.out.println("Better found with Axel: " + newPenalty);
+                    //System.out.println("Better found with Axel: " + newPenalty);
                     for (int i = 0; i < tmpRequestToCar.length; i++) {
                         this.bestRequestTocar[i] = tmpRequestToCar[i].clone();
                     }
