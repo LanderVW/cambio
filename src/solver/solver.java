@@ -3,6 +3,7 @@ package solver;
 import Generator.*;
 import model.Car;
 import model.Request;
+import model.RequestComparator;
 import model.Solution;
 
 import java.util.*;
@@ -25,6 +26,9 @@ public class solver {
     private List<Integer> bounds;
     private int[][] bestRequestTocar;
     private int globalBestSolution = Integer.MAX_VALUE;
+
+    private Map<String, Integer> plateToIdMap = new HashMap<String, Integer>();
+    private Map<Integer, Integer> requestIdMapSmaller = new HashMap<>();
 
     public solver(List<Request> requestList, List<Integer> zoneList, List<Car> carList, Integer days, int[][] adjacentZone) {
         this.requestList = requestList;
@@ -61,6 +65,19 @@ public class solver {
     }
 
     public void init() {
+        int teller = 0;
+        for (Car car :
+                carList) {
+            plateToIdMap.put(car.getPlateNumber(), teller++);
+
+        }
+        teller = 0;
+        for (Request request :
+                requestList) {
+            requestIdMapSmaller.put(request.getRequest_id(), teller++);
+        }
+
+
         //overlappende requests
         requestToRequest = new int[requestList.size()][requestList.size()];
         for (int i = 0; i < requestList.size(); i++) {
@@ -106,7 +123,7 @@ public class solver {
 
     public void assignCarsToZones() {
 
-        int MAX_IDLE = 1000;
+        int MAX_IDLE = 1;
         int L = 5000;
 
         //initial solution
@@ -154,8 +171,8 @@ public class solver {
                         this.bestRequestTocar[i] = requestToCar[i].clone();
                     }
                     saveBest(carList.size(), requestList.size(), zoneList.size());
-                    bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
-                    solveRequestsToCars(bestSolution);
+//                    bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
+//                    solveRequestsToCars(bestSolution);
                 }
             } else {
                 //niet accepteren
@@ -178,8 +195,8 @@ public class solver {
             }
             if (idle >= MAX_IDLE) {
                 //TODO local search binnen assignment van requests aan cars
-                bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
-                solveRequestsToCars(bestSolution);
+//                bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
+//                solveRequestsToCars(bestSolution);
                 while (restartCount < 5) {
                     randomCarToZoneAssignment();
                     restartCount++;
@@ -196,7 +213,9 @@ public class solver {
     private void saveBest(int numberOfCars, int numberOfRequests, int numberOfZones) {
         if(bestSolution.getPenalty() < globalBestSolution){
             bestSolution.setRequestToCar(bestRequestTocar);
-            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones);
+            System.out.println("best:" + globalBestSolution);
+//            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones);
+            bestSolution.saveToCSV(numberOfCars, numberOfRequests, numberOfZones, carList, requestList);
 
             globalBestSolution = bestSolution.getPenalty();
         }
@@ -205,7 +224,7 @@ public class solver {
 
     public void solveRequestsToCars(Solution bsolution) {
         //generate al possible moves
-        Generator generator = new ReplaceMoveGenerator();
+        Generator generator = new ReplaceMoveGenerator(plateToIdMap);
         List<ReplaceMove> possibleMoveList = generator.generateRandom(bsolution, bsolution.getRequestList(), adjacentZone);
         int[][] tmpRequestToCar = new int[this.bestRequestTocar.length][];
         ReplaceMove replaceMove;
@@ -233,25 +252,30 @@ public class solver {
 //                while(tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] == 1){
 //                    replaceMove = possibleMoveList.get(random.nextInt(possibleMoveList.size()));
 //                }
-
+                int newRequestID = requestIdMapSmaller.get(replaceMove.getNewRequestID());
                 for (int i = 0; i < carList.size(); i++) {
-                    if (tmpRequestToCar[replaceMove.getNewRequestID()][i] == 1) {
-                        tmpRequestToCar[replaceMove.getNewRequestID()][i] = 0;
+
+                    if (tmpRequestToCar[newRequestID][i] == 1) {
+                        tmpRequestToCar[newRequestID][i] = 0;
                     }
                 }
-                tmpRequestToCar[replaceMove.getNewRequestID()][replaceMove.getNewCarID()] = 1;
+                int newCarID = replaceMove.getNewCarID();
+                tmpRequestToCar[newRequestID][newCarID] = 1;
 
-                overlappingList = getOverlappingRequestList(replaceMove.getNewCarID(), replaceMove.getNewRequestID(), tmpRequestToCar);
+                overlappingList = getOverlappingRequestList(newCarID, newRequestID, tmpRequestToCar);
                 if (overlappingList != null) {
                     //er is overlap en die moeten allemaal op nul gezet worden
                     for (Request r : overlappingList) {
-                        if (replaceMove.getNewRequestID() != r.getRequest_id()) {
-                            tmpRequestToCar[r.getRequest_id()][replaceMove.getNewCarID()] = 0;
+                        int rID = requestIdMapSmaller.get(r.getRequest_id());
+
+                        if (newRequestID != rID) {
+                            tmpRequestToCar[rID][newCarID] = 0;
                         }
                     }
                 }
                 //nieuwe penalty berekenen
                 newPenalty = getCost(tmpRequestToCar);
+              //  System.out.println(newPenalty);
 
 //                System.out.println("Cost: " + newPenalty);
                 if (newPenalty < bestSolution.getPenalty()) {
@@ -294,7 +318,7 @@ public class solver {
         bestpenaltyBeforelocalsearchonrequest = bestSolution.getPenalty();
 //        bestSolution.setRequestList(requestList);
 //        solveRequestsToVehicles(bestSolution);
-        solveRequestsToCars(bestSolution);
+//        solveRequestsToCars(bestSolution);
 //        System.out.println("the best was: " + bestpenaltyBeforelocalsearchonrequest);
         System.out.println("the best is after local search: " + bestSolution.getPenalty());
         bestSolution.setRequestToCar(bestRequestTocar);
@@ -363,7 +387,8 @@ public class solver {
     private Request findRequestForId(int s) {
         for (Request r : requestList
                 ) {
-            if (r.getRequest_id() == s) {
+            int requestID = requestIdMapSmaller.get(r.getRequest_id());
+            if (requestID == s) {
                 return r;
             }
         }
@@ -384,13 +409,16 @@ public class solver {
             boolean assigned = false;
             boolean carAvailable = false;
             for (int j = 0; j < possibleVehicles.size(); j++) {
-                int vehicleID = possibleVehicles.get(j);
+                int vehicleID = plateToIdMap.get(possibleVehicles.get(j));
                 //vehicle is beschikbaar in gevraagde zone, checken indien mogelijk om toe te kennen
                 //er wordt geen penalty aangerekend
                 if (carToZone[vehicleID][requestList.get(i).getZone_id()] == 1) {
                     carAvailable = true;
-                    if (!checkOverlappingRequests(vehicleID, requestList.get(i).getRequest_id())) {
-                        requestToCar[requestList.get(i).getRequest_id()][vehicleID] = 1;
+//                    System.out.println(vehicleID);
+                    int requestId = requestIdMapSmaller.get(requestList.get(i).getRequest_id());
+                    if (!checkOverlappingRequests(vehicleID, requestId)) {
+
+                        requestToCar[requestId][vehicleID] = 1;
                         assigned = true;
                         break;
                     } else {
@@ -404,15 +432,18 @@ public class solver {
             if (!assigned) {
 
                 for (int j = 0; j < possibleVehicles.size(); j++) {
-                    int vehicleID = possibleVehicles.get(j);
+//                    int vehicleID = possibleVehicles.get(j);
+                    int vehicleID = plateToIdMap.get(possibleVehicles.get(j));
                     int carZone = getZoneForCar(vehicleID, carToZone);
                     int requestZone = requestList.get(i).getZone_id();
                     //checken indien voertuig zich in adjacent zone van de request bevindt
 
                     if (adjacentZone[carZone][requestZone] == 1) {
                         //zone waarin car zich bevindt is een aangrenzende zone van requestZone
-                        if (!checkOverlappingRequests(vehicleID, requestList.get(i).getRequest_id())) {
-                            requestToCar[requestList.get(i).getRequest_id()][vehicleID] = 1;
+                        int requestId = requestIdMapSmaller.get(requestList.get(i).getRequest_id());
+                        if (!checkOverlappingRequests(vehicleID, requestId)) {
+
+                            requestToCar[requestId][vehicleID] = 1;
                             assigned = true;
                             penalty += requestList.get(i).getPenalty2();
                             requestList.get(i).setCurrentlyPenalty(requestList.get(i).getPenalty2());

@@ -6,15 +6,22 @@ import model.Solution;
 import solver.solver;
 import sun.nio.cs.Surrogate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ReplaceMoveGenerator implements Generator{
 
     private Solution solution;
     private int[][] adjacentZone; //aanliggende zone matrix
     List<ReplaceMove> moveList;
+    private Map<String, Integer> plateToIdMap = new HashMap<>();
+
+    public ReplaceMoveGenerator(){
+
+    }
+
+    public ReplaceMoveGenerator(Map<String, Integer> plateToIdMap) {
+        this.plateToIdMap = plateToIdMap;
+    }
 
     public List<Integer> getAdjacentZone(int zone){
         int [] zonearray = adjacentZone[zone];
@@ -38,7 +45,7 @@ public class ReplaceMoveGenerator implements Generator{
     }
 
     @Override
-    public List<ReplaceMove> generateRandom(Solution s, List<Request> requestList, int[][] adjacentZone ) {
+    public List<ReplaceMove> generateRandom(Solution s, List<Request> requestList, int[][] adjacentZone) {
         //je genereert alle mogelijke oplossingen: in de huidige cartozone eens kijken als je een bepaalde request kan toekennen aan een andere auto in die zone
         // of in de aanliggende zone
         solution = s;
@@ -47,7 +54,10 @@ public class ReplaceMoveGenerator implements Generator{
         moveList = new ArrayList<>();
         boolean self = false;
         for (Request request: requestList) {
-            for(Integer possibleCarID : request.getPossible_vehicle_list()){
+            for (int possibleCar = 0; possibleCar < request.getPossible_vehicle_list().size(); possibleCar++) {
+                int possibleCarID = plateToIdMap.get(request.getPossible_vehicle_list().get(possibleCar));
+
+//            for(Integer possibleCarID : request.getPossible_vehicle_list()){
                 //weet waar de auto nu staat
                 //als de auto staat in adj zone of in de zone dat moet --> in de lijst
                 int currentZoneForCar = getZoneForCar(possibleCarID, s.getCarToZone());

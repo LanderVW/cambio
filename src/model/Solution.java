@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 public class Solution {
 
@@ -181,6 +182,63 @@ public class Solution {
 
     }
 
+    public void saveToCSV(int numberOfCars, int numberOfRequests, int numberOfZones, List<Car> carList, List<Request> requestList) {
+
+        PrintWriter pw = null;
+        try{
+            pw = new PrintWriter(new File("solution.csv"));
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(penalty.toString());
+        sb.append('\n');
+        //vehicle to zone assignments
+        sb.append("+Vehicle assignments\n");
+        for (int i = 0; i < numberOfCars; i++) {
+            for (int j = 0; j < numberOfZones; j++) {
+                if(carToZone[i][j] == 1){
+                    sb.append(carList.get(i).getPlateNumber());
+                    sb.append(';');
+                    sb.append("z");
+                    sb.append(j);
+                    sb.append('\n');
+                }
+            }
+        }
+        //request to car assignments
+        sb.append("+Assigned requests\n");
+        for (int i = 0; i < numberOfRequests; i++) {
+            for (int j = 0; j < numberOfCars ; j++) {
+                if(requestToCar[i][j] == 1){
+                    sb.append(requestList.get(i).getRequest_id());
+                    sb.append(';');
+                    sb.append(carList.get(j).getPlateNumber());
+                    sb.append('\n');
+                }
+            }
+        }
+        //unassigned requests
+        sb.append("+Unassigned requests\n");
+        boolean assigned;
+        for (int i = 0; i < numberOfRequests; i++) {
+            assigned = false;
+            for (int j = 0; j < numberOfCars; j++) {
+                if(requestToCar[i][j] ==1)
+                    assigned = true;
+            }
+            if(!assigned){
+                sb.append(requestList.get(i).getRequest_id());
+                sb.append('\n');
+            }
+        }
+
+        pw.write(sb.toString());
+        pw.close();
+//        System.out.println("done!");
+
+    }
+
     @Override
     public String toString() {
         String rc = "\n";
@@ -213,4 +271,6 @@ public class Solution {
             }
         }
     }
+
+
 }

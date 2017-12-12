@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -34,10 +35,10 @@ public class readProblem {
     //read in problem and make requests, zones, and zone tot zone matrix
 
 //    String csvFile = "toy1.csv";
-    String csvFile = "1_100_7_10_25.csv";
+//    String csvFile = "1_100_7_10_25.csv";
 //    String csvFile = "2_210_3_40_25.csv";
 //    String csvFile = "3_300_6_40_25.csv";
-//    String csvFile = "gent9zones648requests.csv";
+    String csvFile = "gent9zones648requests.csv";
     //    String csvFile = "gent9zones1108requests.csv";
     //    String csvFile = "gent34zones1108requests.csv";
 //    String csvFile = "Hasselt10zones294requests.csv";
@@ -84,9 +85,15 @@ public class readProblem {
                 penalty1 = Integer.parseInt(tmp[6]);
                 penalty2 = Integer.parseInt(tmp[7]);
                 possible_vehicle_list = tmp[5].split(",");
+                List<String> pos_veh_list = new ArrayList<>(Arrays.asList(possible_vehicle_list));
+
                 possible_car_list = new ArrayList();
                 for (Integer j = 0; j < possible_vehicle_list.length; j++) {
-                    possible_car_list.add(Integer.parseInt(possible_vehicle_list[j].replaceAll("\\D+", "")));
+//                    nummerplaat zonder spatie
+//                    System.out.println();
+                    possible_car_list.add(pos_veh_list.get(j));
+//                    possible_car_list.add(possible_vehicle_list[j].replaceAll("@@", ""));
+//                    possible_car_list.add(Integer.parseInt(possible_vehicle_list[j].replaceAll("\\D+", "")));
                 }
                 requestList.add(new Request(request_id, day_index, start_time, duration, penalty1, penalty2, zone_id, possible_car_list));
             }
@@ -115,7 +122,11 @@ public class readProblem {
             for (int i = 0; i < numberOfVehicles; i++) {
                 line = br.readLine();
                 tmp = line.split("");
-                carList.add(new Car(Integer.parseInt(line.replaceAll("\\D+", ""))));
+//                bij nummerplaten
+                carList.add(new Car(line));
+
+//                dit was vroeger zonder nummerplaten
+//                carList.add(new Car(Integer.parseInt(line.replaceAll("\\D+", ""))));
             }
 
 

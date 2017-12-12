@@ -14,8 +14,8 @@ public class Main {
         long endTime = System.currentTimeMillis();
         startUpTime = endTime - startTime;
         long duration = startUpTime;
-
-        while(duration < 30000){
+        System.out.println("start");
+        while(duration < 10000){
             startTime = System.currentTimeMillis();
             solver.reset();
             solver.assignCarsToZones();
@@ -28,7 +28,7 @@ public class Main {
 //        solver.assignCarsToZones();
 //        solver.assignCarsToZones();
         System.out.println(duration);
-        solver.finish();
+//        solver.finish();
         System.out.println(duration);
     }
 }
